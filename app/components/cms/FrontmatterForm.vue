@@ -24,7 +24,7 @@ const emit = defineEmits<{ 'update:modelValue': [Frontmatter] }>()
 // Local copy to avoid controlled-input re-render issues (cursor jump / dropped chars)
 const local = reactive({ ...props.modelValue })
 
-watch(local, () => emit('update:modelValue', { ...local }), { deep: true })
+watch(local, () => emit('update:modelValue', { ...local }), { deep: true, flush: 'sync' })
 
 // Sync from parent only when value actually differs (prevents overwriting local state)
 watch(() => props.modelValue, (v) => {
