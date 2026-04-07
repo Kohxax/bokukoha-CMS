@@ -25,7 +25,7 @@ async function uploadFile(file: File) {
     formData.append('file', file)
     formData.append('collection', props.collection)
     formData.append('slug', props.slug)
-    const { url } = await $fetch<{ url: string }>('/api/admin/images/upload', {
+    const { url } = await $fetch<{ url: string }>('/api/admin/media', {
       method: 'POST',
       body: formData,
     })
