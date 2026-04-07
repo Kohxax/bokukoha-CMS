@@ -18,14 +18,15 @@ services:
       retries: 3
     networks:
       - tunnel_net
-    cloudflared:
-      image: cloudflare/cloudflared:latest
-      restart: unless-stopped
-      command: tunnel run
-      volumes:
-        - ~/.cloudflared:/etc/cloudflared:ro
-      networks:
-        - tunnel_net
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    volumes:
+      - ~/.cloudflared:/etc/cloudflared:ro
+    networks:
+      - tunnel_net
 
 networks:
   tunnel_net:
