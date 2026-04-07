@@ -38,7 +38,10 @@ async function save() {
     toast.success('記事を作成しました')
     await navigateTo(`/work/${slug.value}`)
   } catch (e: any) {
-    toast.error(e?.data?.message ?? '保存に失敗しました')
+    const msg = e?.data?.data?.issues?.map((i: any) => i.message).join(', ')
+      ?? e?.data?.message
+      ?? '保存に失敗しました'
+    toast.error(msg)
   } finally {
     saving.value = false
   }
