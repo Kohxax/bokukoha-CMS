@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
-import { Plus } from 'lucide-vue-next'
+import { Plus, ImageIcon } from 'lucide-vue-next'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -27,20 +26,31 @@ const { data: articles } = await useFetch('/api/admin/work', {
         v-for="article in articles"
         :key="article.slug"
         :to="`/work/${article.slug}`"
-        class="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-accent transition-colors"
+        class="flex items-center gap-3 rounded-lg border border-border bg-card p-2 hover:bg-accent transition-colors"
       >
         <div class="min-w-0 flex-1">
           <p class="truncate font-medium text-sm">{{ article.title }}</p>
-          <p class="text-xs text-muted-foreground mt-0.5">
-            {{ article.date }} · {{ article.category }}
-          </p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <p class="text-xs text-muted-foreground">{{ article.date }} · {{ article.category }}</p>
+            <span
+              class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0"
+              :class="article.draft
+                ? 'bg-amber-500/15 text-amber-400'
+                : 'bg-emerald-500/15 text-emerald-400'"
+            >
+              {{ article.draft ? 'Draft' : 'Published' }}
+            </span>
+          </div>
         </div>
-        <Badge
-          :variant="article.draft ? 'secondary' : 'default'"
-          class="ml-4 shrink-0"
-        >
-          {{ article.draft ? 'Draft' : 'Published' }}
-        </Badge>
+        <div class="shrink-0 w-24 h-16 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+          <img
+            v-if="article.coverImage"
+            :src="article.coverImage"
+            :alt="article.title"
+            class="w-full h-full object-cover"
+          />
+          <ImageIcon v-else class="size-5 text-muted-foreground/40" />
+        </div>
       </NuxtLink>
     </div>
 
