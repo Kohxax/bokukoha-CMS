@@ -56,10 +56,10 @@ const navItems = [
             <SidebarMenuButton size="lg" as-child>
               <NuxtLink to="/">
                 <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
-                  CMS
+                  K
                 </div>
                 <div class="leading-tight">
-                  <span class="truncate text-sm font-semibold">bokukoha CMS</span>
+                  <span class="truncate text-lg font-semibold">ぼくこは.cms</span>
                 </div>
               </NuxtLink>
             </SidebarMenuButton>

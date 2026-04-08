@@ -34,7 +34,7 @@ async function submit() {
     <div class="w-full max-w-sm space-y-6 p-8 rounded-xl border border-border bg-card">
       <div class="space-y-1">
         <h1 class="text-2xl font-semibold tracking-tight text-foreground">
-          bokukoha CMS
+          ぼくこは.cms
         </h1>
         <p class="text-sm text-muted-foreground">管理者パスワードを入力してください</p>
       </div>
