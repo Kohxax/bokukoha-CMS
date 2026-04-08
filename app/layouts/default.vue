@@ -18,6 +18,7 @@ import { Button } from '~/components/ui/button'
 import { Toaster } from '~/components/ui/sonner'
 import { BookText, Briefcase, LogOut, Rocket } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
+import Avatar from '~/components/ui/avatar/Avatar.vue'
 
 const route = useRoute()
 const { clear: clearSession } = useUserSession()
@@ -55,9 +56,9 @@ const navItems = [
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" as-child>
               <NuxtLink to="/">
-                <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
-                  K
-                </div>
+                <Avatar class="flex aspect-square size-8 items-center justify-center">
+                  <NuxtImg src="icon_glass.webp" alt="koha" />
+                </Avatar>
                 <div class="leading-tight">
                   <span class="truncate text-lg font-semibold">ぼくこは.cms</span>
                 </div>
