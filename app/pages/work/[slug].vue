@@ -40,6 +40,11 @@ const body = ref(article!.body ?? '')
 const saving = ref(false)
 const showDeleteDialog = ref(false)
 
+const isDirty = ref(false)
+watch([frontmatter, body], () => { isDirty.value = true }, { deep: true })
+
+const { showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty)
+
 async function save() {
   saving.value = true
   try {
@@ -47,6 +52,7 @@ async function save() {
       method: 'PUT',
       body: { ...frontmatter.value, body: body.value },
     })
+    isDirty.value = false
     toast.success('保存しました')
   } catch (e: any) {
     const msg = e?.data?.data?.issues?.map((i: any) => i.message).join(', ')
@@ -130,6 +136,21 @@ async function deleteArticle() {
       <DialogFooter class="gap-2">
         <Button variant="outline" @click="showDeleteDialog = false">キャンセル</Button>
         <Button variant="destructive" @click="deleteArticle">削除する</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+
+  <Dialog v-model:open="showLeaveDialog">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>保存せずに移動しますか？</DialogTitle>
+        <DialogDescription>
+          未保存の変更があります。移動すると変更が失われます。
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter class="gap-2">
+        <Button variant="outline" @click="cancelLeave">キャンセル</Button>
+        <Button variant="destructive" @click="confirmLeave">移動する</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

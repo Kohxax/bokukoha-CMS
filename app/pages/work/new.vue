@@ -7,6 +7,14 @@ import type { Frontmatter } from '~/components/cms/FrontmatterForm.vue'
 import MarkdownEditor from '~/components/editor/MarkdownEditor.vue'
 import MarkdownPreview from '~/components/editor/MarkdownPreview.vue'
 import { AlignLeft } from 'lucide-vue-next'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -24,6 +32,18 @@ const frontmatter = ref<Frontmatter>({
 const slug = ref('')
 const body = ref('')
 const saving = ref(false)
+
+const isDirty = computed(() =>
+  slug.value !== ''
+  || body.value !== ''
+  || frontmatter.value.title !== ''
+  || frontmatter.value.category !== ''
+  || frontmatter.value.description !== ''
+  || frontmatter.value.tags.length > 0
+  || frontmatter.value.coverImage !== '',
+)
+
+const { showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty)
 
 async function save() {
   if (!slug.value) {
@@ -113,4 +133,19 @@ async function save() {
       </div>
     </div>
   </div>
+
+  <Dialog v-model:open="showLeaveDialog">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>保存せずに移動しますか？</DialogTitle>
+        <DialogDescription>
+          未保存の変更があります。移動すると変更が失われます。
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter class="gap-2">
+        <Button variant="outline" @click="cancelLeave">キャンセル</Button>
+        <Button variant="destructive" @click="confirmLeave">移動する</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
