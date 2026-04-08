@@ -28,7 +28,6 @@
     "marked": "^18.0.0",
     "nuxt": "^4.4.2",
     "nuxt-auth-utils": "^0.5.29",
-    "otplib": "^13.4.0",
     "qrcode": "^1.5.4",
     "radix-vue": "^1.9.17",
     "reka-ui": "^2.9.4",

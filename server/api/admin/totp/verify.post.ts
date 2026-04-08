@@ -1,5 +1,5 @@
-import { authenticator } from 'otplib'
 import { z } from 'zod'
+import { verifyTOTP } from '~/server/utils/totp'
 
 const bodySchema = z.object({
   token: z.string().length(6),
@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const { token } = await readValidatedBody(event, bodySchema.parse)
-  const valid = authenticator.verify({ token, secret: config.totpSecret })
+  const valid = verifyTOTP(token, config.totpSecret)
 
   if (!valid) {
     throw createError({ statusCode: 401, message: 'Invalid TOTP token' })

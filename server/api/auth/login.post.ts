@@ -1,6 +1,6 @@
-import { authenticator } from 'otplib'
 import { compareSync } from 'bcrypt'
 import { z } from 'zod'
+import { verifyTOTP } from '~/server/utils/totp'
 
 const bodySchema = z.object({
   password: z.string().min(1),
@@ -25,11 +25,7 @@ export default defineEventHandler(async (event) => {
     if (!body.totpToken) {
       throw createError({ statusCode: 401, message: 'TOTP token required' })
     }
-    const totpValid = authenticator.verify({
-      token: body.totpToken,
-      secret: config.totpSecret,
-    })
-    if (!totpValid) {
+    if (!verifyTOTP(body.totpToken, config.totpSecret)) {
       throw createError({ statusCode: 401, message: 'Invalid TOTP token' })
     }
   }

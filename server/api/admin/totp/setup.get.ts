@@ -1,14 +1,13 @@
-import { authenticator } from 'otplib'
 import QRCode from 'qrcode'
+import { generateSecret, keyuri } from '~/server/utils/totp'
 
 export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
 
-  const secret = config.totpSecret || authenticator.generateSecret()
+  const secret = config.totpSecret || generateSecret()
   const isConfigured = !!config.totpSecret
 
-  const otpauthUrl = authenticator.keyuri('admin', 'bokukoha.cms', secret)
-  // toDataURL はサーバー環境で canvas が必要なので SVG を使う
+  const otpauthUrl = keyuri('admin', 'bokukoha.cms', secret)
   const qrSvg = await QRCode.toString(otpauthUrl, { type: 'svg' })
 
   return {
