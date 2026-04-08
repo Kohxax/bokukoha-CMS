@@ -15,38 +15,24 @@ export interface Frontmatter {
 }
 
 const props = defineProps<{
-  modelValue: Frontmatter
   collection: string
   slug: string
 }>()
-const emit = defineEmits<{ 'update:modelValue': [Frontmatter] }>()
 
-// Local copy to avoid controlled-input re-render issues (cursor jump / dropped chars)
-const local = reactive({ ...props.modelValue })
+const model = defineModel<Frontmatter>({ required: true })
 
-watch(local, () => emit('update:modelValue', { ...local }), { deep: true, flush: 'sync' })
+function set<K extends keyof Frontmatter>(key: K, value: Frontmatter[K]) {
+  model.value = { ...model.value, [key]: value }
+}
 
-// Sync from parent only when value actually differs (prevents overwriting local state)
-watch(() => props.modelValue, (v) => {
-  for (const k in v) {
-    const key = k as keyof Frontmatter
-    if (JSON.stringify(v[key]) !== JSON.stringify(local[key])) {
-      (local as any)[key] = v[key]
-    }
-  }
-}, { deep: true })
-
-// Tags: display as comma-separated string, parse only on blur to avoid mid-type transforms
-const tagsRaw = ref(local.tags.join(', '))
-watch(() => local.tags, (tags) => {
+// Tags: display as comma-separated string, parse only on blur
+const tagsRaw = ref(model.value.tags.join(', '))
+watch(() => model.value.tags, (tags) => {
   const joined = tags.join(', ')
   if (joined !== tagsRaw.value) tagsRaw.value = joined
 })
-function onTagsBlur() {
-  local.tags = tagsRaw.value
-    .split(/[,\s]+/)
-    .map(t => t.trim())
-    .filter(Boolean)
+function applyTags() {
+  set('tags', tagsRaw.value.split(/[,\s]+/).map(t => t.trim()).filter(Boolean))
 }
 </script>
 
@@ -56,8 +42,9 @@ function onTagsBlur() {
     <div class="space-y-1.5">
       <label class="text-sm font-medium">タイトル <span class="text-destructive">*</span></label>
       <Input
-        v-model="local.title"
+        :value="model.title"
         placeholder="記事タイトル"
+        @input="set('title', ($event.target as HTMLInputElement).value)"
       />
     </div>
 
@@ -66,15 +53,17 @@ function onTagsBlur() {
       <div class="space-y-1.5">
         <label class="text-sm font-medium">日付 <span class="text-destructive">*</span></label>
         <Input
-          v-model="local.date"
+          :value="model.date"
           type="date"
+          @input="set('date', ($event.target as HTMLInputElement).value)"
         />
       </div>
       <div class="space-y-1.5">
         <label class="text-sm font-medium">カテゴリ <span class="text-destructive">*</span></label>
         <Input
-          v-model="local.category"
+          :value="model.category"
           placeholder="カテゴリ"
+          @input="set('category', ($event.target as HTMLInputElement).value)"
         />
       </div>
     </div>
@@ -85,7 +74,7 @@ function onTagsBlur() {
       <Input
         v-model="tagsRaw"
         placeholder="タグをカンマ区切りで入力（例: Vue, Nuxt, TypeScript）"
-        @blur="onTagsBlur"
+        @blur="applyTags"
       />
     </div>
 
@@ -93,13 +82,14 @@ function onTagsBlur() {
     <div class="space-y-1.5">
       <label class="text-sm font-medium">カバー画像URL <span class="text-destructive">*</span></label>
       <Input
-        v-model="local.coverImage"
+        :value="model.coverImage"
         placeholder="https://images.bokukoha.dev/..."
+        @input="set('coverImage', ($event.target as HTMLInputElement).value)"
       />
       <ImageUploader
-        :collection="collection"
-        :slug="slug"
-        @uploaded="local.coverImage = $event"
+        :collection="props.collection"
+        :slug="props.slug"
+        @uploaded="set('coverImage', $event)"
       />
     </div>
 
@@ -107,20 +97,21 @@ function onTagsBlur() {
     <div class="space-y-1.5">
       <label class="text-sm font-medium">説明 <span class="text-destructive">*</span></label>
       <Textarea
-        v-model="local.description"
+        :value="model.description"
         placeholder="記事の説明文"
         rows="3"
+        @input="set('description', ($event.target as HTMLTextAreaElement).value)"
       />
     </div>
 
     <!-- draft -->
     <div class="flex items-center gap-3">
       <Switch
-        :checked="local.draft"
-        @update:checked="local.draft = $event"
+        :checked="model.draft"
+        @update:checked="set('draft', $event)"
       />
       <label class="text-sm font-medium cursor-pointer select-none">
-        下書き{{ local.draft ? '（非公開）' : 'をオフ（公開）' }}
+        下書き{{ model.draft ? '（非公開）' : 'をオフ（公開）' }}
       </label>
     </div>
   </div>
