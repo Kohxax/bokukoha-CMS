@@ -4,10 +4,29 @@ import { Plus, ImageIcon, BookText } from 'lucide-vue-next'
 
 definePageMeta({ middleware: 'auth' })
 
+type SortOrder = 'newest' | 'oldest' | 'updated'
+
 const articles = ref<any[] | null>(null)
+const sortOrder = ref<SortOrder>('newest')
+
 onMounted(async () => {
   articles.value = await $fetch<any[]>('/api/admin/blog')
 })
+
+const sortedArticles = computed(() => {
+  if (!articles.value) return null
+  return [...articles.value].sort((a, b) => {
+    if (sortOrder.value === 'newest') return a.date < b.date ? 1 : -1
+    if (sortOrder.value === 'oldest') return a.date > b.date ? 1 : -1
+    return a.updatedAt < b.updatedAt ? 1 : -1
+  })
+})
+
+const sortOptions: { value: SortOrder; label: string }[] = [
+  { value: 'newest', label: '新しい順' },
+  { value: 'oldest', label: '古い順' },
+  { value: 'updated', label: '最終更新順' },
+]
 </script>
 
 <template>
@@ -25,9 +44,21 @@ onMounted(async () => {
       </Button>
     </div>
 
-    <div v-if="articles && articles.length > 0" class="space-y-2">
+    <div v-if="articles && articles.length > 0">
+      <div class="flex gap-1 mb-3">
+        <button
+          v-for="opt in sortOptions"
+          :key="opt.value"
+          class="px-2.5 py-1 text-xs rounded-md transition-colors"
+          :class="sortOrder === opt.value
+            ? 'bg-accent text-accent-foreground font-medium'
+            : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'"
+          @click="sortOrder = opt.value"
+        >{{ opt.label }}</button>
+      </div>
+      <div class="space-y-2">
       <NuxtLink
-        v-for="article in articles"
+        v-for="article in sortedArticles"
         :key="article.slug"
         :to="`/blog/${article.slug}`"
         class="flex items-center gap-3 rounded-lg border border-border bg-card p-2 hover:bg-accent transition-colors"
@@ -56,6 +87,7 @@ onMounted(async () => {
           <ImageIcon v-else class="size-5 text-muted-foreground/40" />
         </div>
       </NuxtLink>
+      </div>
     </div>
 
     <div v-else-if="articles !== null" class="flex flex-col items-center justify-center py-24 text-muted-foreground">
