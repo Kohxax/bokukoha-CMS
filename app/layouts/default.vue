@@ -127,5 +127,7 @@ const navItems = [
     </SidebarInset>
   </SidebarProvider>
 
-  <Toaster position="bottom-right" />
+  <ClientOnly>
+    <Toaster position="bottom-right" />
+  </ClientOnly>
 </template>
