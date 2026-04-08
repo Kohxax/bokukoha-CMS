@@ -21,15 +21,29 @@ if (!article.value) {
 }
 
 const frontmatter = ref<Frontmatter>({
-  title: article.value?.title ?? '',
-  date: article.value?.date ?? '',
-  category: article.value?.category ?? '',
-  tags: article.value?.tags ?? [],
-  coverImage: article.value?.coverImage ?? '',
-  draft: article.value?.draft ?? true,
-  description: article.value?.description ?? '',
+  title: '',
+  date: '',
+  category: '',
+  tags: [],
+  coverImage: '',
+  draft: true,
+  description: '',
 })
-const body = ref(article.value?.body ?? '')
+const body = ref('')
+
+watch(article, (a) => {
+  if (!a) return
+  frontmatter.value = {
+    title: a.title,
+    date: a.date,
+    category: a.category,
+    tags: a.tags,
+    coverImage: a.coverImage,
+    draft: a.draft,
+    description: a.description,
+  }
+  body.value = a.body
+}, { immediate: true })
 const saving = ref(false)
 
 async function save() {
