@@ -14,37 +14,12 @@ const props = defineProps<{
 }>()
 
 const isOpen = ref(true)
-const activeId = ref('')
 
 function scrollToHeading(id: string) {
   const el = document.getElementById(id)
   if (!el) return
   el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
-
-onMounted(() => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          activeId.value = entry.target.id
-        }
-      })
-    },
-    {
-      root: props.containerRef ?? null,
-      rootMargin: '-80px 0px -60% 0px',
-    },
-  )
-
-  document.querySelectorAll('.preview-content h2, .preview-content h3, .preview-content h4').forEach((h) => {
-    observer.observe(h)
-  })
-
-  onUnmounted(() => {
-    observer.disconnect()
-  })
-})
 </script>
 
 <template>
@@ -72,17 +47,9 @@ onMounted(() => {
             <a
               :href="`#${link.id}`"
               @click.prevent="scrollToHeading(link.id)"
-              class="group flex items-start gap-1 py-1 transition-colors hover:text-primary relative pl-2 border-l-2"
-              :class="[
-                activeId === link.id
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground',
-              ]"
+              class="group flex items-start gap-1 py-1 transition-colors hover:text-primary relative pl-2 text-muted-foreground"
             >
-              <span
-                class="mt-0.5 min-w-6 text-sm font-mono group-hover:text-primary/70"
-                :class="activeId === link.id ? 'text-primary' : 'text-muted-foreground'"
-              >
+              <span class="mt-0.5 min-w-6 text-sm font-mono text-muted-foreground group-hover:text-primary/70">
                 {{ i + 1 }}.
               </span>
               <span class="leading-relaxed">{{ link.text }}</span>
@@ -93,17 +60,9 @@ onMounted(() => {
                 <a
                   :href="`#${child.id}`"
                   @click.prevent="scrollToHeading(child.id)"
-                  class="group flex items-start gap-1 py-0.5 transition-colors hover:text-primary relative pl-2 border-l-2"
-                  :class="[
-                    activeId === child.id
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-muted-foreground',
-                  ]"
+                  class="group flex items-start gap-1 py-0.5 transition-colors hover:text-primary relative pl-2 text-muted-foreground"
                 >
-                  <span
-                    class="mt-0.5 min-w-8 text-xs font-mono group-hover:text-primary/70"
-                    :class="activeId === child.id ? 'text-primary' : 'text-muted-foreground/70'"
-                  >
+                  <span class="mt-0.5 min-w-8 text-xs font-mono text-muted-foreground/70 group-hover:text-primary/70">
                     {{ i + 1 }}.{{ j + 1 }}.
                   </span>
                   <span class="leading-relaxed">{{ child.text }}</span>
@@ -114,17 +73,9 @@ onMounted(() => {
                     <a
                       :href="`#${grand.id}`"
                       @click.prevent="scrollToHeading(grand.id)"
-                      class="group flex items-start gap-2 py-0.5 transition-colors hover:text-primary relative pl-2 border-l-2"
-                      :class="[
-                        activeId === grand.id
-                          ? 'border-primary text-primary'
-                          : 'border-transparent text-muted-foreground/80',
-                      ]"
+                      class="group flex items-start gap-2 py-0.5 transition-colors hover:text-primary relative pl-2 text-muted-foreground/80"
                     >
-                      <span
-                        class="mt-0.5 min-w-10 text-[10px] font-mono group-hover:text-primary/70"
-                        :class="activeId === grand.id ? 'text-primary' : 'text-muted-foreground/60'"
-                      >
+                      <span class="mt-0.5 min-w-10 text-[10px] font-mono text-muted-foreground/60 group-hover:text-primary/70">
                         {{ i + 1 }}.{{ j + 1 }}.{{ k + 1 }}.
                       </span>
                       <span class="leading-relaxed">{{ grand.text }}</span>
