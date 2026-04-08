@@ -209,11 +209,13 @@ const containerRef = ref<HTMLElement | null>(null)
   margin-bottom: 1.5rem;
 }
 
-.prose :deep(figure img) {
+.prose :deep(img) {
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  display: block;
   margin-left: auto;
   margin-right: auto;
+  max-width: 100%;
 }
 
 .prose :deep(figcaption) {
