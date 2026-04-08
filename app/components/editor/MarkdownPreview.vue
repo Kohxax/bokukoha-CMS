@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { marked, Renderer } from 'marked'
 import { CalendarIcon, ClockIcon } from 'lucide-vue-next'
+import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import type { Frontmatter } from '~/components/cms/FrontmatterForm.vue'
 import PreviewToc from '~/components/editor/PreviewToc.vue'
 
@@ -9,17 +9,13 @@ const props = defineProps<{
   frontmatter?: Frontmatter
 }>()
 
-// Slugify: matches marked's default heading ID generation
+// Slugify: matches Nuxt Content's heading ID generation
 function slugify(text: string): string {
   return text
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '')
     .replace(/\s+/g, '-')
-}
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '')
 }
 
 type TocLink = {
@@ -49,7 +45,6 @@ const tocLinks = computed<TocLink[]>(() => {
       if (parent) parent.children.push(link)
       else links.push(link)
     } else {
-      // depth === 4
       const parent = links[links.length - 1]
       if (parent) {
         const child = parent.children[parent.children.length - 1]
@@ -64,22 +59,16 @@ const tocLinks = computed<TocLink[]>(() => {
   return links
 })
 
-// Custom renderer: add IDs to headings so TOC links work
-const renderer = new Renderer()
-renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
-  const id = slugify(stripHtml(text))
-  return `<h${depth} id="${id}">${text}</h${depth}>\n`
-}
-renderer.image = function ({ href, text }: { href: string; text: string }) {
-  const caption = text
-    ? `<figcaption>${text}</figcaption>`
-    : ''
-  return `<figure><img src="${href}" alt="${text}">${caption}</figure>`
-}
+// MDCパース結果（クライアントのみ）
+const parsedContent = ref<Awaited<ReturnType<typeof parseMarkdown>> | null>(null)
 
-const html = computed(() => {
-  if (!props.content) return ''
-  return marked.parse(props.content, { renderer }) as string
+watchEffect(async () => {
+  if (!import.meta.client) return
+  if (!props.content) {
+    parsedContent.value = null
+    return
+  }
+  parsedContent.value = await parseMarkdown(props.content)
 })
 
 // Reading time (characters-based, same as blog)
@@ -140,7 +129,9 @@ const containerRef = ref<HTMLElement | null>(null)
         </div>
 
         <!-- Body -->
-        <CardContent class="prose prose-invert max-w-none px-5 pb-8 preview-content" v-html="html" />
+        <CardContent class="prose prose-invert max-w-none px-5 pb-8 preview-content">
+          <MDCRenderer v-if="parsedContent" :body="parsedContent.body" :data="parsedContent.data" />
+        </CardContent>
       </Card>
     </div>
   </div>
