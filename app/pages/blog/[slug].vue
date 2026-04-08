@@ -7,6 +7,14 @@ import type { Frontmatter } from '~/components/cms/FrontmatterForm.vue'
 import MarkdownEditor from '~/components/editor/MarkdownEditor.vue'
 import MarkdownPreview from '~/components/editor/MarkdownPreview.vue'
 import { AlignLeft } from 'lucide-vue-next'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -30,6 +38,7 @@ const frontmatter = ref<Frontmatter>({
 })
 const body = ref(article!.body ?? '')
 const saving = ref(false)
+const showDeleteDialog = ref(false)
 
 async function save() {
   saving.value = true
@@ -50,7 +59,6 @@ async function save() {
 }
 
 async function deleteArticle() {
-  if (!confirm('この記事を削除しますか？')) return
   try {
     await $fetch(`/api/admin/blog/${slug}`, { method: 'DELETE' })
     toast.success('削除しました')
@@ -69,7 +77,7 @@ async function deleteArticle() {
         <NuxtLink to="/blog"><AlignLeft />一覧</NuxtLink>
       </Button>
       <span class="text-sm text-muted-foreground flex-1 truncate">{{ slug }}</span>
-      <Button variant="destructive" size="sm" @click="deleteArticle">削除</Button>
+      <Button variant="destructive" size="sm" @click="showDeleteDialog = true">削除</Button>
       <Button size="sm" :disabled="saving" @click="save">
         {{ saving ? '保存中...' : '保存' }}
       </Button>
@@ -113,4 +121,19 @@ async function deleteArticle() {
       </div>
     </div>
   </div>
+
+  <Dialog v-model:open="showDeleteDialog">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>記事を削除しますか？</DialogTitle>
+        <DialogDescription>
+          「{{ slug }}」を削除します。この操作は取り消せません。
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter class="gap-2">
+        <Button variant="outline" @click="showDeleteDialog = false">キャンセル</Button>
+        <Button variant="destructive" @click="deleteArticle">削除する</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
