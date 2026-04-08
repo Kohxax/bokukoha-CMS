@@ -4,6 +4,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  app: {
+    head: {
+      title: 'ぼくこは.cms',
+      meta: [{ name: 'robots', content: 'noindex, nofollow' }],
+    },
+  },
+
   css: ['~/assets/css/main.css', 'vue-sonner/style.css'],
 
   vite: {
