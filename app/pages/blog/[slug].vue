@@ -6,6 +6,7 @@ import FrontmatterForm from '~/components/cms/FrontmatterForm.vue'
 import type { Frontmatter } from '~/components/cms/FrontmatterForm.vue'
 import MarkdownEditor from '~/components/editor/MarkdownEditor.vue'
 import MarkdownPreview from '~/components/editor/MarkdownPreview.vue'
+import { AlignLeft } from 'lucide-vue-next'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -65,7 +66,7 @@ async function deleteArticle() {
     <!-- toolbar -->
     <div class="flex items-center gap-3 border-b border-border px-4 py-2 shrink-0">
       <Button variant="ghost" size="sm" as-child>
-        <NuxtLink to="/blog">← 一覧</NuxtLink>
+        <NuxtLink to="/blog"><AlignLeft />一覧</NuxtLink>
       </Button>
       <span class="text-sm text-muted-foreground flex-1 truncate">{{ slug }}</span>
       <Button variant="destructive" size="sm" @click="deleteArticle">削除</Button>
