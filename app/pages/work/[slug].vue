@@ -12,38 +12,22 @@ definePageMeta({ middleware: 'auth' })
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { data: article } = await useFetch(`/api/admin/work/${slug}`, {
-  getCachedData: () => undefined,
-})
+const article = await $fetch(`/api/admin/work/${slug}`).catch(() => null)
 
-if (!article.value) {
+if (!article) {
   await navigateTo('/work')
 }
 
 const frontmatter = ref<Frontmatter>({
-  title: '',
-  date: '',
-  category: '',
-  tags: [],
-  coverImage: '',
-  draft: true,
-  description: '',
+  title: article!.title,
+  date: article!.date,
+  category: article!.category,
+  tags: article!.tags ?? [],
+  coverImage: article!.coverImage,
+  draft: article!.draft,
+  description: article!.description ?? '',
 })
-const body = ref('')
-
-watch(article, (a) => {
-  if (!a) return
-  frontmatter.value = {
-    title: a.title,
-    date: a.date,
-    category: a.category,
-    tags: a.tags,
-    coverImage: a.coverImage,
-    draft: a.draft,
-    description: a.description,
-  }
-  body.value = a.body
-}, { immediate: true })
+const body = ref(article!.body ?? '')
 const saving = ref(false)
 
 async function save() {
