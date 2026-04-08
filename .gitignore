@@ -26,3 +26,7 @@ logs
 .claude
 CLAUDE.md 
 PLAN.md
+docs
+db
+migrations
+scripts
