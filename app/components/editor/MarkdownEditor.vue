@@ -11,7 +11,10 @@ import {
   Heading3Icon,
   ListIcon,
   ListOrderedIcon,
+  PuzzleIcon,
+  ChevronDownIcon,
 } from 'lucide-vue-next'
+import { onClickOutside } from '@vueuse/core'
 import ImageInsertModal from '~/components/editor/ImageInsertModal.vue'
 
 const props = defineProps<{
@@ -24,6 +27,8 @@ const emit = defineEmits<{ 'update:modelValue': [string] }>()
 const editorRef = ref<HTMLElement>()
 let view: any = null
 const showModal = ref(false)
+const showComponentMenu = ref(false)
+const componentMenuRef = ref<HTMLElement>()
 
 onMounted(async () => {
   const { EditorView, basicSetup } = await import('codemirror')
@@ -83,7 +88,6 @@ function insertAtCursor(text: string) {
   view.focus()
 }
 
-// 選択テキストをマーカーで囲む（選択なしなら空のマーカーを挿入してカーソルを中に置く）
 function wrapSelection(before: string, after: string) {
   if (!view) return
   const { from, to } = view.state.selection.main
@@ -96,7 +100,6 @@ function wrapSelection(before: string, after: string) {
   view.focus()
 }
 
-// 行頭にプレフィックスを付ける（すでに付いてたらトグルで外す）
 function toggleLinePrefix(prefix: string) {
   if (!view) return
   const { from, to } = view.state.selection.main
@@ -121,54 +124,62 @@ function toggleLinePrefix(prefix: string) {
   view.focus()
 }
 
+// カーソル位置にコンポーネントを挿入してカーソルを編集すべき箇所に移動
+function insertComponent(snippet: string, cursorOffset: number) {
+  if (!view) return
+  showComponentMenu.value = false
+  const from = view.state.selection.main.head
+  // 行頭でなければ改行を前に入れる
+  const line = view.state.doc.lineAt(from)
+  const prefix = from !== line.from ? '\n' : ''
+  const insert = prefix + snippet
+  const anchor = from + prefix.length + cursorOffset
+  view.dispatch({
+    changes: { from, to: from, insert },
+    selection: { anchor },
+  })
+  view.focus()
+}
+
+const componentSnippets = [
+  {
+    label: 'Alert',
+    description: '警告・注意ボックス',
+    snippet: '::Alert\nここにテキスト\n::',
+    // "::Alert\n" の後ろにカーソル
+    cursorOffset: '::Alert\n'.length,
+  },
+  {
+    label: 'Gallery',
+    description: '画像ギャラリー（スライダー）',
+    snippet: '::Gallery{:images=\'["https://", "https://"]\' }\n::',
+    cursorOffset: '::Gallery{:images=\'["'.length,
+  },
+  {
+    label: 'VideoPlayer',
+    description: 'YouTube / ニコニコ / 動画ファイル',
+    snippet: '::VideoPlayer{src="https://"}\n::',
+    cursorOffset: '::VideoPlayer{src="'.length,
+  },
+]
+
+// クリック外でメニューを閉じる
+onClickOutside(componentMenuRef, () => {
+  showComponentMenu.value = false
+})
+
 const toolbarActions = [
-  {
-    icon: BoldIcon,
-    title: '太字 (Ctrl+B)',
-    action: () => wrapSelection('**', '**'),
-  },
-  {
-    icon: ItalicIcon,
-    title: '斜体 (Ctrl+I)',
-    action: () => wrapSelection('*', '*'),
-  },
-  {
-    icon: StrikethroughIcon,
-    title: '取り消し線',
-    action: () => wrapSelection('~~', '~~'),
-  },
-  {
-    icon: CodeIcon,
-    title: 'インラインコード',
-    action: () => wrapSelection('`', '`'),
-  },
+  { icon: BoldIcon, title: '太字', action: () => wrapSelection('**', '**') },
+  { icon: ItalicIcon, title: '斜体', action: () => wrapSelection('*', '*') },
+  { icon: StrikethroughIcon, title: '取り消し線', action: () => wrapSelection('~~', '~~') },
+  { icon: CodeIcon, title: 'インラインコード', action: () => wrapSelection('`', '`') },
   { separator: true },
-  {
-    icon: Heading2Icon,
-    title: '見出し2',
-    action: () => toggleLinePrefix('## '),
-  },
-  {
-    icon: Heading3Icon,
-    title: '見出し3',
-    action: () => toggleLinePrefix('### '),
-  },
+  { icon: Heading2Icon, title: '見出し2', action: () => toggleLinePrefix('## ') },
+  { icon: Heading3Icon, title: '見出し3', action: () => toggleLinePrefix('### ') },
   { separator: true },
-  {
-    icon: QuoteIcon,
-    title: '引用',
-    action: () => toggleLinePrefix('> '),
-  },
-  {
-    icon: ListIcon,
-    title: '箇条書き',
-    action: () => toggleLinePrefix('- '),
-  },
-  {
-    icon: ListOrderedIcon,
-    title: '番号付きリスト',
-    action: () => toggleLinePrefix('1. '),
-  },
+  { icon: QuoteIcon, title: '引用', action: () => toggleLinePrefix('> ') },
+  { icon: ListIcon, title: '箇条書き', action: () => toggleLinePrefix('- ') },
+  { icon: ListOrderedIcon, title: '番号付きリスト', action: () => toggleLinePrefix('1. ') },
   { separator: true },
   {
     icon: LinkIcon,
@@ -207,7 +218,39 @@ defineExpose({ insertAtCursor })
         </button>
       </template>
 
-      <!-- 画像は末尾 -->
+      <!-- セパレータ -->
+      <div class="w-px h-4 bg-border mx-1" />
+
+      <!-- カスタムコンポーネント挿入 -->
+      <div ref="componentMenuRef" class="relative">
+        <button
+          type="button"
+          class="inline-flex items-center gap-0.5 rounded px-1.5 py-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors text-xs"
+          title="コンポーネントを挿入"
+          @click="showComponentMenu = !showComponentMenu"
+        >
+          <PuzzleIcon class="size-4" />
+          <ChevronDownIcon class="size-3" />
+        </button>
+
+        <div
+          v-show="showComponentMenu"
+          class="absolute top-full right-0 mt-1 z-50 min-w-44 rounded-md border border-border bg-card shadow-md py-1"
+        >
+          <button
+            v-for="comp in componentSnippets"
+            :key="comp.label"
+            type="button"
+            class="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+            @click="insertComponent(comp.snippet, comp.cursorOffset)"
+          >
+            <div class="font-medium text-foreground">{{ comp.label }}</div>
+            <div class="text-xs text-muted-foreground">{{ comp.description }}</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- 画像 -->
       <div class="w-px h-4 bg-border mx-1" />
       <button
         type="button"
