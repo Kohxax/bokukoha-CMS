@@ -33,8 +33,9 @@ onMounted(async () => {
           }
         }),
         EditorView.theme({
-          '&': { height: '100%', fontSize: '13px' },
-          '.cm-scroller': { overflow: 'auto', fontFamily: "'Fira Code', 'Consolas', monospace" },
+          '&': { height: '100%', width: '100%', fontSize: '13px' },
+          '.cm-scroller': { overflow: 'auto', overflowX: 'hidden', fontFamily: "'Fira Code', 'Consolas', monospace" },
+          '.cm-content': { maxWidth: '100%' },
         }),
       ],
     }),
