@@ -34,7 +34,6 @@ export async function createArticle(event: H3Event, table: AnyTable) {
     updatedAt: now,
   }).returning() as ArticleRow[]
 
-  triggerDeploy()
   return rowToArticle(rows[0]!)
 }
 
@@ -54,7 +53,6 @@ export async function updateArticle(event: H3Event, table: AnyTable, slug: strin
   }
 
   const rows = await db.update(table).set(updates).where(eq(table.slug, slug)).returning() as ArticleRow[]
-  triggerDeploy()
   return rowToArticle(rows[0]!)
 }
 
@@ -64,6 +62,5 @@ export async function deleteArticle(table: AnyTable, slug: string) {
   if (!rows[0]) throw createError({ statusCode: 404, message: 'Not found' })
 
   await db.delete(table).where(eq(table.slug, slug))
-  triggerDeploy()
   return { ok: true }
 }

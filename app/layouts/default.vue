@@ -16,7 +16,8 @@ import {
 } from '~/components/ui/sidebar'
 import { Button } from '~/components/ui/button'
 import { Toaster } from '~/components/ui/sonner'
-import { BookText, Briefcase, LogOut } from 'lucide-vue-next'
+import { BookText, Briefcase, LogOut, Rocket } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const route = useRoute()
 const { clear: clearSession } = useUserSession()
@@ -25,6 +26,19 @@ async function logout() {
   await $fetch('/api/auth/logout', { method: 'POST' })
   await clearSession()
   await navigateTo('/login')
+}
+
+const deploying = ref(false)
+async function deploy() {
+  deploying.value = true
+  try {
+    await $fetch('/api/admin/deploy', { method: 'POST' })
+    toast.success('デプロイをトリガーしました')
+  } catch (e: any) {
+    toast.error(e?.data?.message ?? 'デプロイに失敗しました')
+  } finally {
+    deploying.value = false
+  }
 }
 
 const navItems = [
@@ -76,6 +90,12 @@ const navItems = [
 
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton :disabled="deploying" @click="deploy">
+              <Rocket />
+              <span>{{ deploying ? 'Deploying...' : 'Deploy' }}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton @click="logout">
               <LogOut />
