@@ -111,7 +111,7 @@ const draftModel = computed({
 
     <!-- draft -->
     <div class="flex items-center gap-3">
-      <Switch v-model:checked="draftModel" />
+      <Switch v-model="draftModel" />
       <label class="text-sm font-medium cursor-pointer select-none">
         下書き{{ model.draft ? '（非公開）' : 'をオフ（公開）' }}
       </label>
