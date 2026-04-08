@@ -62,7 +62,7 @@ async function submit() {
 
         <div class="space-y-2">
           <label class="text-sm font-medium text-foreground" for="totp">
-            認証コード <span class="text-muted-foreground font-normal">（設定している場合）</span>
+            認証コード
           </label>
           <input
             id="totp"
