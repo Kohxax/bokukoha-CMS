@@ -35,7 +35,7 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['shadcn-nuxt', 'nuxt-auth-utils'],
+  modules: ['shadcn-nuxt', 'nuxt-auth-utils', '@nuxt/image'],
 
   shadcn: {
     prefix: '',
