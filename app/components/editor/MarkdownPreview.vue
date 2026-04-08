@@ -70,6 +70,12 @@ renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
   const id = slugify(stripHtml(text))
   return `<h${depth} id="${id}">${text}</h${depth}>\n`
 }
+renderer.image = function ({ href, text }: { href: string; text: string }) {
+  const caption = text
+    ? `<figcaption>${text}</figcaption>`
+    : ''
+  return `<figure><img src="${href}" alt="${text}">${caption}</figure>`
+}
 
 const html = computed(() => {
   if (!props.content) return ''
@@ -207,9 +213,22 @@ const containerRef = ref<HTMLElement | null>(null)
 }
 
 /* Images */
-.prose :deep(img) {
+.prose :deep(figure) {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.prose :deep(figure img) {
   border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
   margin-left: auto;
   margin-right: auto;
+}
+
+.prose :deep(figcaption) {
+  text-align: center;
+  color: var(--color-muted-foreground);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 }
 </style>
