@@ -109,6 +109,17 @@ const navItems = [
     <SidebarInset>
       <header class="flex h-12 items-center gap-2 border-b border-border px-4">
         <SidebarTrigger class="-ml-1" />
+        <div class="flex-1" />
+        <Button
+          class="md:hidden"
+          size="sm"
+          variant="outline"
+          :disabled="deploying"
+          @click="deploy"
+        >
+          <Rocket class="size-4" />
+          <span>{{ deploying ? '...' : 'Deploy' }}</span>
+        </Button>
       </header>
       <main class="flex-1 overflow-auto">
         <slot />
