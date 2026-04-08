@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '~/components/ui/button'
-import { Plus, ImageIcon } from 'lucide-vue-next'
+import { Plus, ImageIcon, Briefcase } from 'lucide-vue-next'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -12,7 +12,11 @@ const { data: articles } = await useFetch('/api/admin/work', {
 <template>
   <div class="p-6">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-xl font-semibold">Work</h1>
+      <div class="flex-row flex items-center gap-2">
+        <Briefcase />
+        <h1 class="text-xl font-semibold">Work</h1>
+      </div>
+
       <Button as-child size="sm">
         <NuxtLink to="/work/new">
           <Plus class="size-4" />
