@@ -61,7 +61,8 @@ async function save() {
     </div>
 
     <div class="flex flex-1 overflow-hidden">
-      <aside class="w-72 shrink-0 border-r border-border overflow-y-auto p-4 space-y-4">
+      <!-- sidebar: frontmatter (desktop only) -->
+      <aside class="hidden md:flex flex-col w-72 shrink-0 border-r border-border overflow-y-auto p-4 space-y-4">
         <div class="space-y-1.5">
           <label class="text-sm font-medium">slug <span class="text-destructive">*</span></label>
           <input
@@ -82,12 +83,25 @@ async function save() {
         </div>
       </div>
 
+      <!-- mobile: 3 tabs -->
       <div class="flex md:hidden flex-1 overflow-hidden">
-        <Tabs default-value="editor" class="flex flex-col flex-1 overflow-hidden">
+        <Tabs default-value="frontmatter" class="flex flex-col flex-1 overflow-hidden">
           <TabsList class="mx-3 mt-2 shrink-0">
+            <TabsTrigger value="frontmatter" class="flex-1">設定</TabsTrigger>
             <TabsTrigger value="editor" class="flex-1">エディタ</TabsTrigger>
             <TabsTrigger value="preview" class="flex-1">プレビュー</TabsTrigger>
           </TabsList>
+          <TabsContent value="frontmatter" class="flex-1 overflow-y-auto p-3 mt-0 space-y-4">
+            <div class="space-y-1.5">
+              <label class="text-sm font-medium">slug <span class="text-destructive">*</span></label>
+              <input
+                v-model="slug"
+                placeholder="my-work-slug"
+                class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+            </div>
+            <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" />
+          </TabsContent>
           <TabsContent value="editor" class="flex-1 overflow-hidden p-3 mt-0">
             <MarkdownEditor v-model="body" collection="work" :slug="slug" />
           </TabsContent>

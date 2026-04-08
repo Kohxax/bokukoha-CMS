@@ -75,8 +75,8 @@ async function deleteArticle() {
     </div>
 
     <div class="flex flex-1 overflow-hidden">
-      <!-- sidebar: frontmatter -->
-      <aside class="w-72 shrink-0 border-r border-border overflow-y-auto p-4">
+      <!-- sidebar: frontmatter (desktop only) -->
+      <aside class="hidden md:block w-72 shrink-0 border-r border-border overflow-y-auto p-4">
         <FrontmatterForm v-model="frontmatter" collection="blog" :slug="slug" />
       </aside>
 
@@ -91,13 +91,17 @@ async function deleteArticle() {
         </div>
       </div>
 
-      <!-- mobile: tabs -->
+      <!-- mobile: 3 tabs -->
       <div class="flex md:hidden flex-1 overflow-hidden">
         <Tabs default-value="editor" class="flex flex-col flex-1 overflow-hidden">
           <TabsList class="mx-3 mt-2 shrink-0">
+            <TabsTrigger value="frontmatter" class="flex-1">設定</TabsTrigger>
             <TabsTrigger value="editor" class="flex-1">エディタ</TabsTrigger>
             <TabsTrigger value="preview" class="flex-1">プレビュー</TabsTrigger>
           </TabsList>
+          <TabsContent value="frontmatter" class="flex-1 overflow-y-auto p-3 mt-0">
+            <FrontmatterForm v-model="frontmatter" collection="blog" :slug="slug" />
+          </TabsContent>
           <TabsContent value="editor" class="flex-1 overflow-hidden p-3 mt-0">
             <MarkdownEditor v-model="body" collection="blog" :slug="slug" />
           </TabsContent>
