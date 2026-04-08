@@ -92,7 +92,7 @@ async function deleteArticle() {
       <!-- editor + preview -->
       <!-- desktop: 2-pane -->
       <div class="hidden md:flex flex-1 overflow-hidden">
-        <div class="flex-1 overflow-hidden p-3">
+        <div class="flex-1 overflow-hidden p-3 min-w-0">
           <MarkdownEditor v-model="body" collection="blog" :slug="slug" />
         </div>
         <div class="flex-1 overflow-hidden p-3">
@@ -111,7 +111,7 @@ async function deleteArticle() {
           <TabsContent value="frontmatter" class="flex-1 overflow-y-auto p-3 mt-0">
             <FrontmatterForm v-model="frontmatter" collection="blog" :slug="slug" />
           </TabsContent>
-          <TabsContent value="editor" class="flex-1 overflow-hidden p-3 mt-0">
+          <TabsContent value="editor" class="flex-1 overflow-hidden p-3 mt-0 min-w-0">
             <MarkdownEditor v-model="body" collection="blog" :slug="slug" />
           </TabsContent>
           <TabsContent value="preview" class="flex-1 overflow-hidden p-3 mt-0">

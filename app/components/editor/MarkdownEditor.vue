@@ -26,6 +26,7 @@ onMounted(async () => {
         basicSetup,
         markdown(),
         oneDark,
+        EditorView.lineWrapping,
         EditorView.updateListener.of((update: any) => {
           if (update.docChanged) {
             emit('update:modelValue', update.state.doc.toString())
@@ -86,7 +87,7 @@ defineExpose({ insertAtCursor })
       </button>
     </div>
 
-    <div ref="editorRef" class="flex-1 overflow-hidden" />
+    <div ref="editorRef" class="flex-1 overflow-hidden min-w-0" />
 
     <ImageInsertModal
       v-model:open="showModal"
