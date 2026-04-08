@@ -12,7 +12,9 @@ definePageMeta({ middleware: 'auth' })
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { data: article } = await useFetch(`/api/admin/blog/${slug}`)
+const { data: article } = await useFetch(`/api/admin/blog/${slug}`, {
+  getCachedData: () => undefined,
+})
 
 if (!article.value) {
   await navigateTo('/blog')

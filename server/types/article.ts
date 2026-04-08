@@ -35,6 +35,7 @@ export function rowToArticle(row: ArticleRow): Article {
   return {
     ...row,
     tags: JSON.parse(row.tags || '[]'),
+    draft: Boolean(row.draft),
   }
 }
 

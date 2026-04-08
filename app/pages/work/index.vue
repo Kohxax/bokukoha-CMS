@@ -5,7 +5,9 @@ import { Plus } from 'lucide-vue-next'
 
 definePageMeta({ middleware: 'auth' })
 
-const { data: articles } = await useFetch('/api/admin/work')
+const { data: articles } = await useFetch('/api/admin/work', {
+  getCachedData: () => undefined,
+})
 </script>
 
 <template>
