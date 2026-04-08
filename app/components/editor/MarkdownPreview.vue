@@ -37,8 +37,8 @@ const tocLinks = computed<TocLink[]>(() => {
   let match: RegExpExecArray | null
 
   while ((match = regex.exec(props.content)) !== null) {
-    const depth = match[1].length
-    const text = match[2].trim()
+    const depth = match[1]!.length
+    const text = match[2]!.trim()
     const id = slugify(text)
     const link: TocLink = { id, depth, text, children: [] }
 
