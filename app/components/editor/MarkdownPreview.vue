@@ -100,7 +100,7 @@ const containerRef = ref<HTMLElement | null>(null)
         <!-- Header -->
         <CardHeader class="pt-2 px-5" v-if="frontmatter">
           <div v-if="frontmatter.category" class="mb-2">
-            <span class="inline-flex items-center rounded-md bg-secondary text-secondary-foreground px-3 py-1 text-sm font-medium">
+            <span class="inline-flex items-center rounded-md bg-secondary text-secondary-foreground px-6 py-2 text-sm font-medium">
               {{ frontmatter.category }}
             </span>
           </div>
