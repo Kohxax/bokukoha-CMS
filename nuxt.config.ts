@@ -8,6 +8,24 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      dedupe: ['@codemirror/state', '@codemirror/view'],
+    },
+    optimizeDeps: {
+      include: [
+        'codemirror',
+        '@codemirror/lang-markdown',
+        '@codemirror/theme-one-dark',
+        'lucide-vue-next',
+        'class-variance-authority',
+        'reka-ui',
+        '@vueuse/core',
+        'clsx',
+        'tailwind-merge',
+        'marked',
+        'vue-sonner',
+      ],
+    },
   },
 
   modules: ['shadcn-nuxt', 'nuxt-auth-utils'],
@@ -20,6 +38,12 @@ export default defineNuxtConfig({
   runtimeConfig: {
     sessionSecret: '',
     adminPasswordHash: '',
+    session: {
+      password: '',
+      cookie: {
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
     r2AccountId: '',
     r2AccessKeyId: '',
     r2SecretAccessKey: '',
