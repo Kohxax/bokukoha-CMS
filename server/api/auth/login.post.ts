@@ -1,6 +1,6 @@
 import { compareSync } from 'bcrypt'
 import { z } from 'zod'
-import { verifyTOTP } from '~/server/utils/totp'
+import { verifyTOTP } from '../../utils/totp'
 
 const bodySchema = z.object({
   password: z.string().min(1),

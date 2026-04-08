@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { verifyTOTP } from '~/server/utils/totp'
+import { verifyTOTP } from '../../../utils/totp'
 
 const bodySchema = z.object({
   token: z.string().length(6),

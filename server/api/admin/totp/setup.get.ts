@@ -1,5 +1,5 @@
 import QRCode from 'qrcode'
-import { generateSecret, keyuri } from '~/server/utils/totp'
+import { generateSecret, keyuri } from '../../../utils/totp'
 
 export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
