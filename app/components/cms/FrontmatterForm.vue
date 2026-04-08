@@ -34,6 +34,11 @@ watch(() => model.value.tags, (tags) => {
 function applyTags() {
   set('tags', tagsRaw.value.split(/[,\s]+/).map(t => t.trim()).filter(Boolean))
 }
+
+const draftModel = computed({
+  get: () => model.value.draft,
+  set: (val: boolean) => set('draft', val),
+})
 </script>
 
 <template>
@@ -106,10 +111,7 @@ function applyTags() {
 
     <!-- draft -->
     <div class="flex items-center gap-3">
-      <Switch
-        :checked="model.draft"
-        @update:checked="set('draft', $event)"
-      />
+      <Switch v-model:checked="draftModel" />
       <label class="text-sm font-medium cursor-pointer select-none">
         下書き{{ model.draft ? '（非公開）' : 'をオフ（公開）' }}
       </label>
