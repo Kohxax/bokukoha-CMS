@@ -8,6 +8,7 @@ if (loggedIn.value) {
 }
 
 const password = ref('')
+const totpToken = ref('')
 const error = ref('')
 const loading = ref(false)
 
@@ -17,12 +18,17 @@ async function submit() {
   try {
     await $fetch('/api/auth/login', {
       method: 'POST',
-      body: { password: password.value },
+      body: { password: password.value, totpToken: totpToken.value || undefined },
     })
     await refreshSession()
     await navigateTo('/')
-  } catch {
-    error.value = 'パスワードが正しくありません'
+  } catch (e: unknown) {
+    const status = (e as { statusCode?: number }).statusCode
+    if (status === 429) {
+      error.value = 'ログイン試行回数が多すぎます。しばらく待ってから再試行してください'
+    } else {
+      error.value = 'パスワードまたは認証コードが正しくありません'
+    }
   } finally {
     loading.value = false
   }
@@ -51,6 +57,23 @@ async function submit() {
             autocomplete="current-password"
             required
             class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="totp">
+            認証コード <span class="text-muted-foreground font-normal">（設定している場合）</span>
+          </label>
+          <input
+            id="totp"
+            v-model="totpToken"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
+            autocomplete="one-time-code"
+            placeholder="000000"
+            class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring tracking-widest"
           >
         </div>
 

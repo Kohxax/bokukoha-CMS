@@ -51,8 +51,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     sessionSecret: '',
     adminPasswordHash: '',
+    totpSecret: '',
     session: {
       password: '',
+      maxAge: 60 * 60 * 8, // 8時間
       cookie: {
         secure: process.env.NODE_ENV === 'production',
       },
@@ -64,6 +66,17 @@ export default defineNuxtConfig({
     r2PublicUrl: 'https://images.bokukoha.dev',
     dbPath: '/app/data/cms.db',
     cfDeployHookUrl: '',
+  },
+
+  routeRules: {
+    '/**': {
+      headers: {
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.bokukoha.dev blob:; connect-src 'self'; font-src 'self' data:; frame-ancestors 'none';",
+      },
+    },
   },
 
   future: {
