@@ -80,7 +80,7 @@ async function save() {
           <MarkdownEditor v-model="body" collection="work" :slug="slug" />
         </div>
         <div class="flex-1 overflow-hidden p-3">
-          <MarkdownPreview :content="body" />
+          <MarkdownPreview :content="body" :frontmatter="frontmatter" />
         </div>
       </div>
 
@@ -107,7 +107,7 @@ async function save() {
             <MarkdownEditor v-model="body" collection="work" :slug="slug" />
           </TabsContent>
           <TabsContent value="preview" class="flex-1 overflow-hidden p-3 mt-0">
-            <MarkdownPreview :content="body" />
+            <MarkdownPreview :content="body" :frontmatter="frontmatter" />
           </TabsContent>
         </Tabs>
       </div>
