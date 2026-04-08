@@ -66,7 +66,7 @@ const navItems = [
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" as-child>
-              <NuxtLink to="/">
+              <NuxtLink to="/blog">
                 <Avatar class="flex aspect-square size-8 items-center justify-center">
                   <NuxtImg src="icon_glass.webp" alt="koha" />
                 </Avatar>
@@ -133,7 +133,7 @@ const navItems = [
           <span>{{ deploying ? '...' : 'Deploy' }}</span>
         </Button>
       </header>
-      <main class="flex-1 overflow-auto">
+      <main class="relative flex-1 overflow-auto">
         <slot />
       </main>
     </SidebarInset>

@@ -4,8 +4,9 @@ import { Plus, ImageIcon, BookText } from 'lucide-vue-next'
 
 definePageMeta({ middleware: 'auth' })
 
-const { data: articles, refresh } = await useFetch('/api/admin/blog', {
-  getCachedData: () => undefined,
+const articles = ref<any[] | null>(null)
+onMounted(async () => {
+  articles.value = await $fetch<any[]>('/api/admin/blog')
 })
 </script>
 
@@ -57,7 +58,7 @@ const { data: articles, refresh } = await useFetch('/api/admin/blog', {
       </NuxtLink>
     </div>
 
-    <div v-else class="flex flex-col items-center justify-center py-24 text-muted-foreground">
+    <div v-else-if="articles !== null" class="flex flex-col items-center justify-center py-24 text-muted-foreground">
       <p class="text-sm">記事がありません</p>
       <Button as-child size="sm" variant="outline" class="mt-4">
         <NuxtLink to="/blog/new">最初の記事を作成</NuxtLink>

@@ -21,29 +21,48 @@ definePageMeta({ middleware: 'auth' })
 const route = useRoute()
 const slug = route.params.slug as string
 
-const article = await $fetch(`/api/admin/work/${slug}`).catch(() => null)
-
-if (!article) {
-  await navigateTo('/work')
-}
-
+const loaded = ref(false)
 const frontmatter = ref<Frontmatter>({
-  title: article!.title,
-  date: article!.date,
-  category: article!.category,
-  tags: article!.tags ?? [],
-  coverImage: article!.coverImage,
-  draft: article!.draft,
-  description: article!.description ?? '',
+  title: '',
+  date: '',
+  category: '',
+  tags: [],
+  coverImage: '',
+  draft: true,
+  description: '',
 })
-const body = ref(article!.body ?? '')
+const body = ref('')
 const saving = ref(false)
 const showDeleteDialog = ref(false)
-
 const isDirty = ref(false)
-watch([frontmatter, body], () => { isDirty.value = true }, { deep: true })
+
+let dirtyEnabled = false
+watch([frontmatter, body], () => {
+  if (dirtyEnabled) isDirty.value = true
+}, { deep: true })
 
 const { showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty)
+
+onMounted(async () => {
+  const article = await $fetch(`/api/admin/work/${slug}`).catch(() => null)
+  if (!article) {
+    await navigateTo('/work')
+    return
+  }
+  frontmatter.value = {
+    title: article.title,
+    date: article.date,
+    category: article.category,
+    tags: article.tags ?? [],
+    coverImage: article.coverImage,
+    draft: article.draft,
+    description: article.description ?? '',
+  }
+  body.value = article.body ?? ''
+  loaded.value = true
+  await nextTick()
+  dirtyEnabled = true
+})
 
 async function save() {
   saving.value = true
@@ -88,7 +107,7 @@ async function deleteArticle() {
       </Button>
     </div>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div v-if="loaded" class="flex flex-1 overflow-hidden">
       <!-- sidebar: frontmatter (desktop only) -->
       <aside class="hidden md:block w-72 shrink-0 border-r border-border overflow-y-auto p-4">
         <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" />
