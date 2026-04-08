@@ -76,7 +76,7 @@ function applyTags() {
       <label class="text-sm font-medium">タグ</label>
       <Input
         v-model="tagsRaw"
-        placeholder="タグをカンマ区切りで入力（例: Vue, Nuxt, TypeScript）"
+        placeholder="タグ(カンマ区切り)"
         @blur="applyTags"
       />
     </div>
@@ -84,7 +84,7 @@ function applyTags() {
     <!-- coverImage -->
     <div class="space-y-1.5">
       <label class="text-sm font-medium">カバー画像URL <span class="text-destructive">*</span></label>
-      <Input v-model="coverImage" placeholder="https://images.bokukoha.dev/..." />
+      <Input v-model="coverImage" placeholder="URL" />
       <ImageUploader
         :collection="props.collection"
         :slug="props.slug"
@@ -95,7 +95,7 @@ function applyTags() {
     <!-- description -->
     <div class="space-y-1.5">
       <label class="text-sm font-medium">説明 <span class="text-destructive">*</span></label>
-      <Textarea v-model="description" placeholder="記事の説明文" rows="3" />
+      <Textarea v-model="description" placeholder="説明文" rows="3" />
     </div>
 
     <!-- draft -->
