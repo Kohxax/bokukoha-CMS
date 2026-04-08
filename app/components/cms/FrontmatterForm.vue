@@ -21,24 +21,34 @@ const props = defineProps<{
 
 const model = defineModel<Frontmatter>({ required: true })
 
-function set<K extends keyof Frontmatter>(key: K, value: Frontmatter[K]) {
-  model.value = { ...model.value, [key]: value }
+function field<K extends keyof Frontmatter>(key: K) {
+  return computed({
+    get: () => model.value[key],
+    set: (value: Frontmatter[K]) => {
+      model.value = { ...model.value, [key]: value }
+    },
+  })
 }
+
+const title = field('title')
+const date = field('date')
+const category = field('category')
+const coverImage = field('coverImage')
+const description = field('description')
+const draftModel = field('draft')
 
 // Tags: display as comma-separated string, parse only on blur
 const tagsRaw = ref(model.value.tags.join(', '))
 watch(() => model.value.tags, (tags) => {
-  const joined = tags.join(', ')
+  const joined = (tags ?? []).join(', ')
   if (joined !== tagsRaw.value) tagsRaw.value = joined
 })
 function applyTags() {
-  set('tags', tagsRaw.value.split(/[,\s]+/).map(t => t.trim()).filter(Boolean))
+  model.value = {
+    ...model.value,
+    tags: tagsRaw.value.split(/[,\s]+/).map(t => t.trim()).filter(Boolean),
+  }
 }
-
-const draftModel = computed({
-  get: () => model.value.draft,
-  set: (val: boolean) => set('draft', val),
-})
 </script>
 
 <template>
@@ -46,30 +56,18 @@ const draftModel = computed({
     <!-- title -->
     <div class="space-y-1.5">
       <label class="text-sm font-medium">タイトル <span class="text-destructive">*</span></label>
-      <Input
-        :value="model.title"
-        placeholder="記事タイトル"
-        @input="set('title', ($event.target as HTMLInputElement).value)"
-      />
+      <Input v-model="title" placeholder="記事タイトル" />
     </div>
 
     <!-- date + category row -->
     <div class="grid grid-cols-2 gap-4">
       <div class="space-y-1.5">
         <label class="text-sm font-medium">日付 <span class="text-destructive">*</span></label>
-        <Input
-          :value="model.date"
-          type="date"
-          @input="set('date', ($event.target as HTMLInputElement).value)"
-        />
+        <Input v-model="date" type="date" />
       </div>
       <div class="space-y-1.5">
         <label class="text-sm font-medium">カテゴリ <span class="text-destructive">*</span></label>
-        <Input
-          :value="model.category"
-          placeholder="カテゴリ"
-          @input="set('category', ($event.target as HTMLInputElement).value)"
-        />
+        <Input v-model="category" placeholder="カテゴリ" />
       </div>
     </div>
 
@@ -86,27 +84,18 @@ const draftModel = computed({
     <!-- coverImage -->
     <div class="space-y-1.5">
       <label class="text-sm font-medium">カバー画像URL <span class="text-destructive">*</span></label>
-      <Input
-        :value="model.coverImage"
-        placeholder="https://images.bokukoha.dev/..."
-        @input="set('coverImage', ($event.target as HTMLInputElement).value)"
-      />
+      <Input v-model="coverImage" placeholder="https://images.bokukoha.dev/..." />
       <ImageUploader
         :collection="props.collection"
         :slug="props.slug"
-        @uploaded="set('coverImage', $event)"
+        @uploaded="coverImage = $event"
       />
     </div>
 
     <!-- description -->
     <div class="space-y-1.5">
       <label class="text-sm font-medium">説明 <span class="text-destructive">*</span></label>
-      <Textarea
-        :value="model.description"
-        placeholder="記事の説明文"
-        rows="3"
-        @input="set('description', ($event.target as HTMLTextAreaElement).value)"
-      />
+      <Textarea v-model="description" placeholder="記事の説明文" rows="3" />
     </div>
 
     <!-- draft -->
