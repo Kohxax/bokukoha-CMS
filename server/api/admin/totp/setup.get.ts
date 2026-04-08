@@ -8,14 +8,14 @@ export default defineEventHandler(async () => {
   const isConfigured = !!config.totpSecret
 
   const otpauthUrl = authenticator.keyuri('admin', 'bokukoha.cms', secret)
-  const qrDataUrl = await QRCode.toDataURL(otpauthUrl)
+  // toDataURL はサーバー環境で canvas が必要なので SVG を使う
+  const qrSvg = await QRCode.toString(otpauthUrl, { type: 'svg' })
 
   return {
     secret,
-    qrDataUrl,
+    qrSvg,
     otpauthUrl,
     isConfigured,
-    // 未設定の場合は環境変数への設定手順を案内
     envHint: isConfigured ? null : `NUXT_TOTP_SECRET=${secret}`,
   }
 })
