@@ -19,6 +19,14 @@ import { Toaster } from '~/components/ui/sonner'
 import { BookText, Briefcase, LogOut, Rocket } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import Avatar from '~/components/ui/avatar/Avatar.vue'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog'
 
 const route = useRoute()
 const { clear: clearSession } = useUserSession()
@@ -30,7 +38,10 @@ async function logout() {
 }
 
 const deploying = ref(false)
-async function deploy() {
+const showDeployDialog = ref(false)
+
+async function confirmDeploy() {
+  showDeployDialog.value = false
   deploying.value = true
   try {
     await $fetch('/api/admin/deploy', { method: 'POST' })
@@ -92,7 +103,7 @@ const navItems = [
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton :disabled="deploying" @click="deploy">
+            <SidebarMenuButton :disabled="deploying" @click="showDeployDialog = true">
               <Rocket />
               <span>{{ deploying ? 'Deploying...' : 'Deploy' }}</span>
             </SidebarMenuButton>
@@ -116,7 +127,7 @@ const navItems = [
           size="sm"
           variant="outline"
           :disabled="deploying"
-          @click="deploy"
+          @click="showDeployDialog = true"
         >
           <Rocket class="size-4" />
           <span>{{ deploying ? '...' : 'Deploy' }}</span>
@@ -131,4 +142,19 @@ const navItems = [
   <ClientOnly>
     <Toaster position="bottom-right" />
   </ClientOnly>
+
+  <Dialog v-model:open="showDeployDialog">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>デプロイしますか？</DialogTitle>
+        <DialogDescription>
+          Cloudflare Pages のビルドをトリガーします。
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter class="gap-2">
+        <Button variant="outline" @click="showDeployDialog = false">キャンセル</Button>
+        <Button @click="confirmDeploy">デプロイする</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
