@@ -16,7 +16,10 @@ const currentPage = computed(() => {
 })
 const sortOrder = computed<SortOrder>(() => (route.query.sort as SortOrder) || 'newest')
 
-const { data: articles } = await useFetch<any[]>('/api/admin/work', { server: false })
+const articles = ref<any[] | null>(null)
+onMounted(async () => {
+  articles.value = await $fetch<any[]>('/api/admin/work')
+})
 
 const sortedArticles = computed(() => {
   if (!articles.value) return []
