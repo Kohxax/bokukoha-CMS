@@ -13,6 +13,8 @@ onMounted(async () => {
   articles.value = await $fetch<any[]>('/api/admin/work')
 })
 
+const articleCount = computed(() => articles.value?.length ?? 0)
+
 const sortedArticles = computed(() => {
   if (!articles.value) return null
   return [...articles.value].sort((a, b) => {
@@ -35,6 +37,9 @@ const sortOptions: { value: SortOrder; label: string }[] = [
       <div class="flex-row flex items-center gap-2">
         <Briefcase />
         <h1 class="text-xl font-semibold">Work</h1>
+        <Badge varient="destructive" class="mt-1 h-4 min-w-5 rounded-full px-1 font-mono tabular-nums">
+          {{ articleCount }}
+        </Badge>
       </div>
 
       <Button as-child size="sm">

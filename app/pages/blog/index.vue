@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from '~/components/ui/button'
 import { Plus, ImageIcon, BookText } from 'lucide-vue-next'
+import Badge from '~/components/ui/badge/Badge.vue'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -12,6 +13,8 @@ const sortOrder = ref<SortOrder>('newest')
 onMounted(async () => {
   articles.value = await $fetch<any[]>('/api/admin/blog')
 })
+
+const articleCount = computed(() => articles.value?.length ?? 0)
 
 const sortedArticles = computed(() => {
   if (!articles.value) return null
@@ -35,6 +38,9 @@ const sortOptions: { value: SortOrder; label: string }[] = [
       <div class="flex flex-row items-center gap-2">
         <BookText />
         <h1 class="text-xl font-semibold">Blog</h1>
+        <Badge varient="destructive" class="mt-1 h-4 min-w-5 rounded-full px-1 font-mono tabular-nums">
+          {{ articleCount }}
+        </Badge>
       </div>
       <Button as-child size="sm">
         <NuxtLink to="/blog/new">
