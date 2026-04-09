@@ -31,7 +31,7 @@ const showComponentMenu = ref(false)
 const componentMenuRef = ref<HTMLElement>()
 
 onMounted(async () => {
-  const { EditorView, basicSetup } = await import('codemirror')
+  const { EditorView, basicSetup, scrollPastEnd } = await import('codemirror')
   const { markdown } = await import('@codemirror/lang-markdown')
   const { oneDark } = await import('@codemirror/theme-one-dark')
   const { EditorState } = await import('@codemirror/state')
@@ -44,6 +44,7 @@ onMounted(async () => {
         markdown(),
         oneDark,
         EditorView.lineWrapping,
+        scrollPastEnd(),
         EditorView.updateListener.of((update: any) => {
           if (update.docChanged) {
             emit('update:modelValue', update.state.doc.toString())
