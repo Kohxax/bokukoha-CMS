@@ -10,7 +10,8 @@ RUN corepack enable && corepack prepare pnpm@10.20.0 --activate
 
 # Install dependencies first (layer-cached unless lockfile changes)
 COPY package.json pnpm-lock.yaml .npmrc ./
-RUN pnpm install --frozen-lockfile
+# Force build from source so native modules (better-sqlite3, bcrypt) compile for musl/Alpine
+RUN npm_config_build_from_source=true pnpm install --frozen-lockfile
 
 # Build
 COPY . .
