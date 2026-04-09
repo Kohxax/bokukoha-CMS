@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '~/components/ui/button'
-import { Plus, ImageIcon, Briefcase } from 'lucide-vue-next'
+import { Plus, ImageIcon, BookText } from 'lucide-vue-next'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -10,13 +10,16 @@ type SortOrder = 'newest' | 'oldest' | 'updated'
 const route = useRoute()
 const router = useRouter()
 
-const currentPage = computed(() => Number(route.params.page))
+const currentPage = computed(() => {
+  const p = Number(route.params.page)
+  return Number.isFinite(p) && p > 0 ? p : 1
+})
 const sortOrder = computed<SortOrder>(() => (route.query.sort as SortOrder) || 'newest')
 
-const { data: articles } = await useFetch<any[]>('/api/admin/work')
+const { data: articles } = await useFetch<any[]>('/api/admin/blog', { server: false })
 
 const sortedArticles = computed(() => {
-  if (!articles.value) return null
+  if (!articles.value) return []
   return [...articles.value].sort((a, b) => {
     if (sortOrder.value === 'newest') return a.date < b.date ? 1 : -1
     if (sortOrder.value === 'oldest') return a.date > b.date ? 1 : -1
@@ -24,20 +27,18 @@ const sortedArticles = computed(() => {
   })
 })
 
-const totalPages = computed(() => {
-  if (!sortedArticles.value) return 1
-  return Math.max(1, Math.ceil(sortedArticles.value.length / PAGE_SIZE))
-})
+const totalPages = computed(() =>
+  sortedArticles.value.length ? Math.ceil(sortedArticles.value.length / PAGE_SIZE) : 1,
+)
 
 const pagedArticles = computed(() => {
-  if (!sortedArticles.value) return null
   const start = (currentPage.value - 1) * PAGE_SIZE
   return sortedArticles.value.slice(start, start + PAGE_SIZE)
 })
 
 watch([totalPages, articles], () => {
   if (articles.value && currentPage.value > totalPages.value) {
-    navigateTo(pageLink(totalPages.value), { replace: true })
+    router.replace(pageLink(totalPages.value))
   }
 })
 
@@ -46,31 +47,30 @@ function sortQuery(order: SortOrder) {
 }
 
 function setSortOrder(order: SortOrder) {
-  router.push({ path: '/work/1', query: sortQuery(order) })
+  router.push({ path: '/blog/page/1', query: sortQuery(order) })
 }
 
 function pageLink(page: number) {
-  return { path: `/work/${page}`, query: sortQuery(sortOrder.value) }
+  return { path: `/blog/page/${page}`, query: sortQuery(sortOrder.value) }
 }
 
-const pageButtons = computed<(number | '...')[]>(() => {
-  const total = totalPages.value
-  const cur = currentPage.value
-  if (total <= 1) return []
-
-  const pages: (number | '...')[] = [1]
-
-  if (cur - 1 > 2) pages.push('...')
-
-  for (let i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) {
-    pages.push(i)
+const displayPages = computed(() => {
+  const pages = new Set<number>([
+    1,
+    totalPages.value,
+    currentPage.value,
+    currentPage.value - 1,
+    currentPage.value + 1,
+  ])
+  const sorted = [...pages].filter((p) => p >= 1 && p <= totalPages.value).sort((a, b) => a - b)
+  const result: (number | string)[] = []
+  let prev: number | null = null
+  for (const p of sorted) {
+    if (prev !== null && p - prev > 1) result.push('…')
+    result.push(p)
+    prev = p
   }
-
-  if (cur + 1 < total - 1) pages.push('...')
-
-  if (total > 1) pages.push(total)
-
-  return pages
+  return result
 })
 
 const sortOptions: { value: SortOrder; label: string }[] = [
@@ -83,12 +83,12 @@ const sortOptions: { value: SortOrder; label: string }[] = [
 <template>
   <div class="p-6">
     <div class="flex items-center justify-between mb-6">
-      <div class="flex-row flex items-center gap-2">
-        <Briefcase />
-        <h1 class="text-xl font-semibold">Work</h1>
+      <div class="flex flex-row items-center gap-2">
+        <BookText />
+        <h1 class="text-xl font-semibold">Blog</h1>
       </div>
       <Button as-child size="sm">
-        <NuxtLink to="/work/new">
+        <NuxtLink to="/blog/new">
           <Plus class="size-4" />
           新規作成
         </NuxtLink>
@@ -112,7 +112,7 @@ const sortOptions: { value: SortOrder; label: string }[] = [
         <NuxtLink
           v-for="article in pagedArticles"
           :key="article.slug"
-          :to="`/work/${article.slug}`"
+          :to="`/blog/${article.slug}`"
           class="flex items-center gap-3 rounded-lg border border-border bg-card p-2 hover:bg-accent transition-colors"
         >
           <div class="min-w-0 flex-1">
@@ -141,16 +141,16 @@ const sortOptions: { value: SortOrder; label: string }[] = [
         </NuxtLink>
       </div>
 
-      <div v-if="pageButtons.length > 0" class="flex items-center justify-center gap-1 mt-6">
-        <template v-for="(btn, i) in pageButtons" :key="i">
-          <span v-if="btn === '...'" class="px-1 text-sm text-muted-foreground">…</span>
+      <div v-if="totalPages > 1" class="flex items-center justify-center gap-1 mt-6">
+        <template v-for="item in displayPages" :key="item">
+          <span v-if="item === '…'" class="px-1 text-sm text-muted-foreground select-none">…</span>
           <Button
             v-else
-            :variant="btn === currentPage ? 'default' : 'ghost'"
+            :variant="item === currentPage ? 'default' : 'ghost'"
             size="icon"
-            as-child
+            @click="router.push(pageLink(Number(item)))"
           >
-            <NuxtLink :to="pageLink(btn)">{{ btn }}</NuxtLink>
+            {{ item }}
           </Button>
         </template>
       </div>
@@ -159,7 +159,7 @@ const sortOptions: { value: SortOrder; label: string }[] = [
     <div v-else-if="articles !== null" class="flex flex-col items-center justify-center py-24 text-muted-foreground">
       <p class="text-sm">記事がありません</p>
       <Button as-child size="sm" variant="outline" class="mt-4">
-        <NuxtLink to="/work/new">最初の記事を作成</NuxtLink>
+        <NuxtLink to="/blog/new">最初の記事を作成</NuxtLink>
       </Button>
     </div>
   </div>
