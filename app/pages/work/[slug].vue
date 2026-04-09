@@ -16,10 +16,7 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog'
 
-definePageMeta({
-  middleware: 'auth',
-  validate: (route) => !/^\d+$/.test(String(route.params.slug)),
-})
+definePageMeta({ middleware: 'auth' })
 
 const route = useRoute()
 const slug = route.params.slug as string
