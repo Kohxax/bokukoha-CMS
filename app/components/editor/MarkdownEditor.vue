@@ -4,6 +4,7 @@ import {
   BoldIcon,
   ItalicIcon,
   CodeIcon,
+  SquareCodeIcon,
   StrikethroughIcon,
   LinkIcon,
   QuoteIcon,
@@ -127,7 +128,8 @@ function toggleLinePrefix(prefix: string) {
 }
 
 // カーソル位置にコンポーネントを挿入してカーソルを編集すべき箇所に移動
-function insertComponent(snippet: string, cursorOffset: number) {
+// selectLength を指定するとカーソル位置から指定文字数を選択状態にする
+function insertComponent(snippet: string, cursorOffset: number, selectLength?: number) {
   if (!view) return
   showComponentMenu.value = false
   const from = view.state.selection.main.head
@@ -138,7 +140,7 @@ function insertComponent(snippet: string, cursorOffset: number) {
   const anchor = from + prefix.length + cursorOffset
   view.dispatch({
     changes: { from, to: from, insert },
-    selection: { anchor },
+    selection: selectLength ? { anchor, head: anchor + selectLength } : { anchor },
   })
   view.focus()
 }
@@ -175,6 +177,7 @@ const toolbarActions = [
   { icon: ItalicIcon, title: '斜体', action: () => wrapSelection('*', '*') },
   { icon: StrikethroughIcon, title: '取り消し線', action: () => wrapSelection('~~', '~~') },
   { icon: CodeIcon, title: 'インラインコード', action: () => wrapSelection('`', '`') },
+  { icon: SquareCodeIcon, title: 'コードブロック', action: () => insertComponent('```js [filename]\ncode here\n```', 3, 2) },
   { separator: true },
   { icon: Heading2Icon, title: '見出し2', action: () => toggleLinePrefix('## ') },
   { icon: Heading3Icon, title: '見出し3', action: () => toggleLinePrefix('### ') },
