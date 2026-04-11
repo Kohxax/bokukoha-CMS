@@ -3,6 +3,7 @@ import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Switch } from '~/components/ui/switch'
 import ImageUploader from '~/components/cms/ImageUploader.vue'
+import { X, Upload } from 'lucide-vue-next'
 
 export interface Frontmatter {
   title: string
@@ -34,6 +35,7 @@ const title = field('title')
 const date = field('date')
 const category = field('category')
 const coverImage = field('coverImage')
+const imageUploader = ref<InstanceType<typeof ImageUploader>>()
 const description = field('description')
 const draftModel = field('draft')
 
@@ -85,7 +87,34 @@ function applyTags() {
     <div class="space-y-1.5">
       <label class="text-sm font-medium">カバー画像URL <span class="text-destructive">*</span></label>
       <Input v-model="coverImage" placeholder="URL" />
+      <div v-if="coverImage" class="relative">
+        <img
+          :src="coverImage"
+          alt="カバー画像プレビュー"
+          class="w-full h-32 object-cover rounded-md border border-border"
+        />
+        <div class="absolute top-1.5 right-1.5 flex gap-1">
+          <button
+            type="button"
+            class="flex items-center justify-center size-7 rounded-md bg-black/60 text-white hover:bg-black/80 transition-colors"
+            title="再アップロード"
+            @click="imageUploader?.openPicker()"
+          >
+            <Upload class="size-3.5" />
+          </button>
+          <button
+            type="button"
+            class="flex items-center justify-center size-7 rounded-md bg-black/60 text-white hover:bg-black/80 transition-colors"
+            title="クリア"
+            @click="coverImage = ''"
+          >
+            <X class="size-3.5" />
+          </button>
+        </div>
+      </div>
       <ImageUploader
+        v-show="!coverImage"
+        ref="imageUploader"
         :collection="props.collection"
         :slug="props.slug"
         @uploaded="coverImage = $event"

@@ -52,6 +52,8 @@ function onDrop(event: DragEvent) {
 function openPicker() {
   fileInput.value?.click()
 }
+
+defineExpose({ openPicker })
 </script>
 
 <template>
