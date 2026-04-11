@@ -4,9 +4,10 @@ import type { Ref, ComputedRef } from 'vue'
 export function useUnsavedChanges(isDirty: Ref<boolean> | ComputedRef<boolean>) {
   const showLeaveDialog = ref(false)
   let resolveLeave: ((value: boolean) => void) | null = null
+  let confirmedLeave = false
 
   onBeforeRouteLeave(async () => {
-    if (!isDirty.value) return true
+    if (!isDirty.value || confirmedLeave) return true
     showLeaveDialog.value = true
     return new Promise<boolean>(resolve => {
       resolveLeave = resolve
@@ -20,6 +21,7 @@ export function useUnsavedChanges(isDirty: Ref<boolean> | ComputedRef<boolean>) 
   })
 
   function confirmLeave() {
+    confirmedLeave = true
     showLeaveDialog.value = false
     resolveLeave?.(true)
   }
