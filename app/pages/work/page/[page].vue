@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { Button } from '~/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 import { Plus, ImageIcon, Briefcase } from 'lucide-vue-next'
 
 definePageMeta({ middleware: 'auth' })
 
 const PAGE_SIZE = 7
 type SortOrder = 'newest' | 'oldest' | 'updated'
+type DraftFilter = 'all' | 'draft' | 'published'
 
 const route = useRoute()
 const router = useRouter()
@@ -15,15 +23,31 @@ const currentPage = computed(() => {
   return Number.isFinite(p) && p > 0 ? p : 1
 })
 const sortOrder = computed<SortOrder>(() => (route.query.sort as SortOrder) || 'newest')
+const categoryFilter = computed(() => (route.query.category as string) || 'all')
+const draftFilter = computed<DraftFilter>(() => (route.query.draft as DraftFilter) || 'all')
 
 const articles = ref<any[] | null>(null)
 onMounted(async () => {
   articles.value = await $fetch<any[]>('/api/admin/work')
 })
 
-const sortedArticles = computed(() => {
+const categories = computed(() => {
   if (!articles.value) return []
-  return [...articles.value].sort((a, b) => {
+  return [...new Set(articles.value.map((a) => a.category))].sort()
+})
+
+const filteredArticles = computed(() => {
+  if (!articles.value) return []
+  return articles.value.filter((a) => {
+    if (categoryFilter.value !== 'all' && a.category !== categoryFilter.value) return false
+    if (draftFilter.value === 'draft' && !a.draft) return false
+    if (draftFilter.value === 'published' && a.draft) return false
+    return true
+  })
+})
+
+const sortedArticles = computed(() => {
+  return [...filteredArticles.value].sort((a, b) => {
     if (sortOrder.value === 'newest') return a.date < b.date ? 1 : -1
     if (sortOrder.value === 'oldest') return a.date > b.date ? 1 : -1
     return a.updatedAt < b.updatedAt ? 1 : -1
@@ -45,16 +69,37 @@ watch([totalPages, articles], () => {
   }
 })
 
-function sortQuery(order: SortOrder) {
-  return order !== 'newest' ? { sort: order } : {}
-}
-
-function setSortOrder(order: SortOrder) {
-  router.push({ path: '/work/page/1', query: sortQuery(order) })
+function buildQuery(overrides: Record<string, string>) {
+  const q: Record<string, string> = {}
+  if (sortOrder.value !== 'newest') q.sort = sortOrder.value
+  if (categoryFilter.value !== 'all') q.category = categoryFilter.value
+  if (draftFilter.value !== 'all') q.draft = draftFilter.value
+  return { ...q, ...overrides }
 }
 
 function pageLink(page: number) {
-  return { path: `/work/page/${page}`, query: sortQuery(sortOrder.value) }
+  return { path: `/work/page/${page}`, query: buildQuery({}) }
+}
+
+function setSort(value: string) {
+  const q = buildQuery({})
+  delete q.sort
+  if (value !== 'newest') q.sort = value
+  router.push({ path: '/work/page/1', query: q })
+}
+
+function setCategory(value: string) {
+  const q = buildQuery({})
+  delete q.category
+  if (value !== 'all') q.category = value
+  router.push({ path: '/work/page/1', query: q })
+}
+
+function setDraft(value: string) {
+  const q = buildQuery({})
+  delete q.draft
+  if (value !== 'all') q.draft = value
+  router.push({ path: '/work/page/1', query: q })
 }
 
 const displayPages = computed(() => {
@@ -75,12 +120,6 @@ const displayPages = computed(() => {
   }
   return result
 })
-
-const sortOptions: { value: SortOrder; label: string }[] = [
-  { value: 'newest', label: '新しい順' },
-  { value: 'oldest', label: '古い順' },
-  { value: 'updated', label: '最終更新順' },
-]
 </script>
 
 <template>
@@ -98,20 +137,42 @@ const sortOptions: { value: SortOrder; label: string }[] = [
       </Button>
     </div>
 
-    <div v-if="articles && articles.length > 0">
-      <div class="flex gap-1 mb-3">
-        <button
-          v-for="opt in sortOptions"
-          :key="opt.value"
-          class="px-2.5 py-1 text-xs rounded-md transition-colors"
-          :class="sortOrder === opt.value
-            ? 'bg-accent text-accent-foreground font-medium'
-            : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'"
-          @click="setSortOrder(opt.value)"
-        >{{ opt.label }}</button>
+    <div v-if="articles !== null">
+      <div class="flex gap-2 mb-3">
+        <Select :model-value="sortOrder" @update:model-value="setSort">
+          <SelectTrigger class="w-36 h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">新しい順</SelectItem>
+            <SelectItem value="oldest">古い順</SelectItem>
+            <SelectItem value="updated">最終更新順</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select :model-value="categoryFilter" @update:model-value="setCategory">
+          <SelectTrigger class="w-36 h-8 text-xs">
+            <SelectValue placeholder="カテゴリ" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">すべてのカテゴリ</SelectItem>
+            <SelectItem v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select :model-value="draftFilter" @update:model-value="setDraft">
+          <SelectTrigger class="w-32 h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">すべて</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div class="space-y-2">
+      <div v-if="sortedArticles.length > 0" class="space-y-2">
         <NuxtLink
           v-for="article in pagedArticles"
           :key="article.slug"
@@ -144,6 +205,10 @@ const sortOptions: { value: SortOrder; label: string }[] = [
         </NuxtLink>
       </div>
 
+      <div v-else class="flex flex-col items-center justify-center py-24 text-muted-foreground">
+        <p class="text-sm">条件に一致する記事がありません</p>
+      </div>
+
       <div v-if="totalPages > 1" class="flex items-center justify-center gap-1 mt-6">
         <template v-for="item in displayPages" :key="item">
           <span v-if="item === '…'" class="px-1 text-sm text-muted-foreground select-none">…</span>
@@ -159,7 +224,7 @@ const sortOptions: { value: SortOrder; label: string }[] = [
       </div>
     </div>
 
-    <div v-else-if="articles !== null" class="flex flex-col items-center justify-center py-24 text-muted-foreground">
+    <div v-else class="flex flex-col items-center justify-center py-24 text-muted-foreground">
       <p class="text-sm">記事がありません</p>
       <Button as-child size="sm" variant="outline" class="mt-4">
         <NuxtLink to="/work/new">最初の記事を作成</NuxtLink>
