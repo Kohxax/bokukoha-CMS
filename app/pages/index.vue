@@ -2,7 +2,7 @@
 definePageMeta({
   middleware: [
     'auth',
-    () => navigateTo('/blog', { replace: true }),
+    () => navigateTo('/blog/page/1', { replace: true }),
   ],
 })
 </script>

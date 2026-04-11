@@ -1,6 +1,10 @@
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
-await navigateTo('/blog/page/1')
+definePageMeta({
+  middleware: [
+    'auth',
+    () => navigateTo('/blog/page/1', { replace: true }),
+  ],
+})
 </script>
 <template>
   <div />
