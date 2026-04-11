@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { Plus, ImageIcon, BookText } from 'lucide-vue-next'
+import { Plus, ImageIcon, BookText, X } from 'lucide-vue-next'
 import { Skeleton } from '~/components/ui/skeleton'
 
 definePageMeta({ middleware: 'auth' })
@@ -103,6 +103,14 @@ function setDraft(value: string) {
   router.push({ path: '/blog/page/1', query: q })
 }
 
+const isFiltered = computed(
+  () => sortOrder.value !== 'newest' || categoryFilter.value !== 'all' || draftFilter.value !== 'all',
+)
+
+function clearFilters() {
+  router.push({ path: '/blog/page/1', query: {} })
+}
+
 const displayPages = computed(() => {
   const pages = new Set<number>([
     1,
@@ -174,6 +182,11 @@ const displayPages = computed(() => {
             <SelectItem value="published">Published</SelectItem>
           </SelectContent>
         </Select>
+
+        <Button v-if="isFiltered" variant="ghost" size="sm" class="h-8 px-2 text-xs text-muted-foreground" @click="clearFilters">
+          <X class="size-3 mr-1" />
+          クリア
+        </Button>
       </div>
 
       <div v-if="sortedArticles.length > 0" class="space-y-2">
