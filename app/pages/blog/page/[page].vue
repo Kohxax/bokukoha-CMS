@@ -185,7 +185,7 @@ const displayPages = computed(() => {
           <div class="min-w-0 flex-1">
             <p class="truncate font-medium text-sm">{{ article.title }}</p>
             <div class="flex items-center gap-2 mt-0.5">
-              <p class="text-xs text-muted-foreground">{{ article.date }} · {{ article.category }}</p>
+              <p class="text-xs text-muted-foreground">{{ article.date }} · {{ article.category }} · {{ article.body?.length.toLocaleString() }}文字</p>
               <span
                 class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0"
                 :class="article.draft

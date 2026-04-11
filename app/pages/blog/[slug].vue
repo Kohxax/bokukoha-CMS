@@ -35,6 +35,7 @@ const body = ref('')
 const saving = ref(false)
 const showDeleteDialog = ref(false)
 const isDirty = ref(false)
+const charCount = computed(() => body.value.length.toLocaleString())
 
 let dirtyEnabled = false
 watch([frontmatter, body], () => {
@@ -101,7 +102,8 @@ async function deleteArticle() {
       <Button variant="ghost" size="sm" as-child>
         <NuxtLink to="/blog"><AlignLeft />一覧</NuxtLink>
       </Button>
-      <span class="text-sm text-muted-foreground flex-1 truncate">{{ slug }}</span>
+      <span class="text-sm text-muted-foreground truncate">{{ slug }}</span>
+      <span class="text-xs text-muted-foreground tabular-nums flex-1">{{ charCount }}文字</span>
       <Button variant="destructive" size="sm" @click="showDeleteDialog = true">削除</Button>
       <Button size="sm" :disabled="saving" @click="save">
         {{ saving ? '保存中...' : '保存' }}
