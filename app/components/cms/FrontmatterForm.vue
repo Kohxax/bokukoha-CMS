@@ -2,6 +2,7 @@
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Switch } from '~/components/ui/switch'
+import { Badge } from '~/components/ui/badge'
 import ImageUploader from '~/components/cms/ImageUploader.vue'
 import CategoryInput from '~/components/cms/CategoryInput.vue'
 import { X, Upload } from 'lucide-vue-next'
@@ -53,6 +54,12 @@ function applyTags() {
     tags: tagsRaw.value.split(/[,\s]+/).map(t => t.trim()).filter(Boolean),
   }
 }
+
+function removeTag(index: number) {
+  const newTags = model.value.tags.filter((_, i) => i !== index)
+  model.value = { ...model.value, tags: newTags }
+  tagsRaw.value = newTags.join(', ')
+}
 </script>
 
 <template>
@@ -83,6 +90,23 @@ function applyTags() {
         placeholder="タグ(カンマ区切り)"
         @blur="applyTags"
       />
+      <div v-if="model.tags.length > 0" class="flex flex-wrap gap-1.5 pt-0.5">
+        <Badge
+          v-for="(tag, i) in model.tags"
+          :key="tag"
+          variant="secondary"
+          class="gap-1 pr-1"
+        >
+          {{ tag }}
+          <button
+            type="button"
+            class="rounded-full hover:bg-foreground/20 transition-colors p-0.5 -mr-0.5"
+            @click="removeTag(i)"
+          >
+            <X class="size-2.5" />
+          </button>
+        </Badge>
+      </div>
     </div>
 
     <!-- coverImage -->
