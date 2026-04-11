@@ -111,9 +111,10 @@ async function deleteArticle() {
         <NuxtLink to="/blog"><AlignLeft />一覧</NuxtLink>
       </Button>
       <span class="text-sm text-muted-foreground truncate">{{ slug }}</span>
+      <span v-if="isDirty" class="text-amber-400 text-xs leading-none" title="未保存の変更があります">●</span>
       <span class="text-xs text-muted-foreground tabular-nums flex-1">{{ charCount }}文字</span>
       <Button variant="destructive" size="sm" @click="showDeleteDialog = true">削除</Button>
-      <Button size="sm" :disabled="saving" @click="save">
+      <Button size="sm" :disabled="saving" :class="isDirty && !saving ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''" @click="save">
         {{ saving ? '保存中...' : '保存' }}
       </Button>
     </div>
