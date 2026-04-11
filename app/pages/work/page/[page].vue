@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Plus, ImageIcon, Briefcase } from 'lucide-vue-next'
+import { Skeleton } from '~/components/ui/skeleton'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -227,11 +228,18 @@ const displayPages = computed(() => {
       </div>
     </div>
 
-    <div v-else class="flex flex-col items-center justify-center py-24 text-muted-foreground">
-      <p class="text-sm">記事がありません</p>
-      <Button as-child size="sm" variant="outline" class="mt-4">
-        <NuxtLink to="/work/new">最初の記事を作成</NuxtLink>
-      </Button>
+    <div v-else class="space-y-2">
+      <div
+        v-for="i in PAGE_SIZE"
+        :key="i"
+        class="flex items-center gap-3 rounded-lg border border-border bg-card p-2"
+      >
+        <div class="min-w-0 flex-1 space-y-2">
+          <Skeleton class="h-4 w-2/3" />
+          <Skeleton class="h-3 w-1/3" />
+        </div>
+        <Skeleton class="shrink-0 w-24 h-16 rounded-md" />
+      </div>
     </div>
   </div>
 </template>
