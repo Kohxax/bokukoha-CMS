@@ -7,6 +7,7 @@ import type { Frontmatter } from '~/components/cms/FrontmatterForm.vue'
 import MarkdownEditor from '~/components/editor/MarkdownEditor.vue'
 import MarkdownPreview from '~/components/editor/MarkdownPreview.vue'
 import { AlignLeft } from 'lucide-vue-next'
+import { useEventListener } from '@vueuse/core'
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,13 @@ const isDirty = computed(() =>
 )
 
 const { showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty)
+
+useEventListener(document, 'keydown', (e: KeyboardEvent) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault()
+    if (!saving.value) save()
+  }
+})
 
 async function save() {
   if (!slug.value) {
