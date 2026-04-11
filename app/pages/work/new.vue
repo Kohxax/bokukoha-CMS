@@ -33,6 +33,12 @@ const frontmatter = ref<Frontmatter>({
 const slug = ref('')
 const body = ref('')
 const saving = ref(false)
+const categorySuggestions = ref<string[]>([])
+
+onMounted(async () => {
+  const articles = await $fetch('/api/admin/work').catch(() => [] as any[])
+  categorySuggestions.value = [...new Set((articles as any[]).map((a: any) => a.category).filter(Boolean))]
+})
 
 const isDirty = computed(() =>
   slug.value !== ''
@@ -100,7 +106,7 @@ async function save() {
             class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
         </div>
-        <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" />
+        <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
       </aside>
 
       <div class="hidden md:flex flex-1 overflow-hidden">
@@ -129,7 +135,7 @@ async function save() {
                 class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
             </div>
-            <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" />
+            <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
           </TabsContent>
           <TabsContent value="editor" class="flex-1 overflow-hidden p-3 mt-0">
             <MarkdownEditor v-model="body" collection="work" :slug="slug" />

@@ -3,6 +3,7 @@ import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Switch } from '~/components/ui/switch'
 import ImageUploader from '~/components/cms/ImageUploader.vue'
+import CategoryInput from '~/components/cms/CategoryInput.vue'
 import { X, Upload } from 'lucide-vue-next'
 
 export interface Frontmatter {
@@ -18,6 +19,7 @@ export interface Frontmatter {
 const props = defineProps<{
   collection: string
   slug: string
+  categorySuggestions?: string[]
 }>()
 
 const model = defineModel<Frontmatter>({ required: true })
@@ -69,7 +71,7 @@ function applyTags() {
       </div>
       <div class="space-y-1.5">
         <label class="text-sm font-medium">カテゴリ <span class="text-destructive">*</span></label>
-        <Input v-model="category" placeholder="カテゴリ" />
+        <CategoryInput v-model="category" :suggestions="props.categorySuggestions" />
       </div>
     </div>
 

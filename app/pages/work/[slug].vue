@@ -23,6 +23,7 @@ const route = useRoute()
 const slug = route.params.slug as string
 
 const loaded = ref(false)
+const categorySuggestions = ref<string[]>([])
 const frontmatter = ref<Frontmatter>({
   title: '',
   date: '',
@@ -53,11 +54,15 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
 })
 
 onMounted(async () => {
-  const article = await $fetch(`/api/admin/work/${slug}`).catch(() => null)
+  const [article, articles] = await Promise.all([
+    $fetch(`/api/admin/work/${slug}`).catch(() => null),
+    $fetch('/api/admin/work').catch(() => [] as any[]),
+  ])
   if (!article) {
     await navigateTo('/work')
     return
   }
+  categorySuggestions.value = [...new Set((articles as any[]).map((a: any) => a.category).filter(Boolean))]
   frontmatter.value = {
     title: article.title,
     date: article.date,
@@ -121,7 +126,7 @@ async function deleteArticle() {
     <div v-if="loaded" class="flex flex-1 overflow-hidden">
       <!-- sidebar: frontmatter (desktop only) -->
       <aside class="hidden md:block w-72 shrink-0 border-r border-border overflow-y-auto p-4">
-        <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" />
+        <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
       </aside>
 
       <div class="hidden md:flex flex-1 overflow-hidden">
@@ -142,7 +147,7 @@ async function deleteArticle() {
             <TabsTrigger value="preview" class="flex-1">プレビュー</TabsTrigger>
           </TabsList>
           <TabsContent value="frontmatter" class="flex-1 overflow-y-auto p-3 mt-0">
-            <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" />
+            <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
           </TabsContent>
           <TabsContent value="editor" class="flex-1 overflow-hidden p-3 mt-0 min-w-0">
             <MarkdownEditor v-model="body" collection="work" :slug="slug" />
