@@ -7,6 +7,8 @@ if (loggedIn.value) {
   await navigateTo('/')
 }
 
+const isDev = import.meta.dev
+
 const password = ref('')
 const totpToken = ref('')
 const error = ref('')
@@ -46,36 +48,42 @@ async function submit() {
       </div>
 
       <form class="space-y-4" @submit.prevent="submit">
-        <div class="space-y-2">
-          <label class="text-sm font-medium text-foreground" for="password">
-            パスワード
-          </label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-        </div>
+        <template v-if="!isDev">
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-foreground" for="password">
+              パスワード
+            </label>
+            <input
+              id="password"
+              v-model="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+          </div>
 
-        <div class="space-y-2">
-          <label class="text-sm font-medium text-foreground" for="totp">
-            認証コード
-          </label>
-          <input
-            id="totp"
-            v-model="totpToken"
-            type="text"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            maxlength="6"
-            autocomplete="one-time-code"
-            placeholder="000000"
-            class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring tracking-widest"
-          >
-        </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-foreground" for="totp">
+              認証コード
+            </label>
+            <input
+              id="totp"
+              v-model="totpToken"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="6"
+              autocomplete="one-time-code"
+              placeholder="000000"
+              class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring tracking-widest"
+            >
+          </div>
+        </template>
+
+        <p v-if="isDev" class="text-xs text-muted-foreground text-center">
+          dev モード — 認証スキップ
+        </p>
 
         <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
 
