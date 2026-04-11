@@ -128,6 +128,9 @@ const displayPages = computed(() => {
       <div class="flex flex-row items-center gap-2">
         <BookText />
         <h1 class="text-xl font-semibold">Blog</h1>
+        <span v-if="articles !== null" class="text-sm text-muted-foreground tabular-nums">
+          {{ categoryFilter === 'all' && draftFilter === 'all' ? articles.length : sortedArticles.length }}
+        </span>
       </div>
       <Button as-child size="sm">
         <NuxtLink to="/blog/new">

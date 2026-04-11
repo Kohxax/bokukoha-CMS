@@ -9,6 +9,7 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
@@ -53,9 +54,15 @@ async function confirmDeploy() {
   }
 }
 
+const { data: counts } = useAsyncData(
+  'counts',
+  () => $fetch('/api/admin/counts').catch(() => null),
+  { server: false },
+)
+
 const navItems = [
-  { title: 'Blog', url: '/blog', icon: BookText },
-  { title: 'Work', url: '/work', icon: Briefcase },
+  { title: 'Blog', url: '/blog', icon: BookText, countKey: 'blog' as const },
+  { title: 'Work', url: '/work', icon: Briefcase, countKey: 'work' as const },
 ]
 </script>
 
@@ -94,6 +101,7 @@ const navItems = [
                     <span>{{ item.title }}</span>
                   </NuxtLink>
                 </SidebarMenuButton>
+                <SidebarMenuBadge v-if="counts">{{ counts[item.countKey] }}</SidebarMenuBadge>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
