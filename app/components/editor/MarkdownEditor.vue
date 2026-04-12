@@ -17,6 +17,17 @@ import {
 } from 'lucide-vue-next'
 import { onClickOutside } from '@vueuse/core'
 import ImageInsertModal from '~/components/editor/ImageInsertModal.vue'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from '~/components/ui/context-menu'
 
 const props = defineProps<{
   modelValue: string
@@ -189,19 +200,21 @@ const toolbarActions = [
   {
     icon: LinkIcon,
     title: 'リンク',
-    action: () => {
-      if (!view) return
-      const { from, to } = view.state.selection.main
-      const selected = view.state.sliceDoc(from, to)
-      const insert = `[${selected || 'テキスト'}](url)`
-      view.dispatch({
-        changes: { from, to, insert },
-        selection: { anchor: from + insert.length - 4, head: from + insert.length - 1 },
-      })
-      view.focus()
-    },
+    action: () => insertLink(),
   },
 ]
+
+function insertLink() {
+  if (!view) return
+  const { from, to } = view.state.selection.main
+  const selected = view.state.sliceDoc(from, to)
+  const insert = `[${selected || 'テキスト'}](url)`
+  view.dispatch({
+    changes: { from, to, insert },
+    selection: { anchor: from + insert.length - 4, head: from + insert.length - 1 },
+  })
+  view.focus()
+}
 
 defineExpose({ insertAtCursor })
 </script>
@@ -267,7 +280,55 @@ defineExpose({ insertAtCursor })
       </button>
     </div>
 
-    <div ref="editorRef" class="flex-1 overflow-hidden min-w-0" />
+    <ContextMenu>
+      <ContextMenuTrigger as-child>
+        <div ref="editorRef" class="flex-1 overflow-hidden min-w-0" />
+      </ContextMenuTrigger>
+      <ContextMenuContent class="w-56">
+        <ContextMenuLabel class="text-xs text-muted-foreground">書式</ContextMenuLabel>
+        <ContextMenuItem @click="wrapSelection('**', '**')">
+          <BoldIcon class="size-4 mr-2" />太字
+        </ContextMenuItem>
+        <ContextMenuItem @click="wrapSelection('*', '*')">
+          <ItalicIcon class="size-4 mr-2" />斜体
+        </ContextMenuItem>
+        <ContextMenuItem @click="wrapSelection('~~', '~~')">
+          <StrikethroughIcon class="size-4 mr-2" />取り消し線
+        </ContextMenuItem>
+        <ContextMenuItem @click="wrapSelection('`', '`')">
+          <CodeIcon class="size-4 mr-2" />インラインコード
+        </ContextMenuItem>
+        <ContextMenuItem @click="insertComponent('```js [filename]\ncode here\n```', 3, 2)">
+          <SquareCodeIcon class="size-4 mr-2" />コードブロック
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuLabel class="text-xs text-muted-foreground">挿入</ContextMenuLabel>
+        <ContextMenuItem @click="showModal = true">
+          <ImageIcon class="size-4 mr-2" />画像
+        </ContextMenuItem>
+        <ContextMenuItem @click="insertLink">
+          <LinkIcon class="size-4 mr-2" />リンク
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuSub>
+          <ContextMenuSubTrigger>
+            <PuzzleIcon class="size-4 mr-2" />コンポーネント
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent class="w-52">
+            <ContextMenuItem
+              v-for="comp in componentSnippets"
+              :key="comp.label"
+              @click="insertComponent(comp.snippet, comp.cursorOffset)"
+            >
+              <div>
+                <div class="font-medium">{{ comp.label }}</div>
+                <div class="text-xs text-muted-foreground">{{ comp.description }}</div>
+              </div>
+            </ContextMenuItem>
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+      </ContextMenuContent>
+    </ContextMenu>
 
     <ImageInsertModal
       v-model:open="showModal"
