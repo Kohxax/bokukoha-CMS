@@ -66,6 +66,7 @@ const navItems = [
 ]
 
 const mediaItem = { title: 'Media', url: '/media', icon: Images, countKey: 'media' as const }
+
 </script>
 
 <template>
@@ -124,6 +125,9 @@ const mediaItem = { title: 'Media', url: '/media', icon: Images, countKey: 'medi
 
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <ActivityHeatmap />
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton :disabled="deploying" @click="showDeployDialog = true">
               <Rocket />
