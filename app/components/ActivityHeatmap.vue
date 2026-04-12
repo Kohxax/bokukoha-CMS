@@ -58,8 +58,8 @@ function cellClass(count: number) {
   >
     <p class="text-xs text-muted-foreground mb-1">アクティビティ</p>
     <Skeleton v-if="pending" class="w-full rounded" style="height: 75px" />
-    <div v-else class="flex gap-[0.3vw]">
-      <div v-for="(week, wi) in weeks" :key="wi" class="flex flex-col gap-[0.3vw]">
+    <div v-else class="flex gap-1.25">
+      <div v-for="(week, wi) in weeks" :key="wi" class="flex flex-col gap-1.25">
         <div
           v-for="cell in week"
           :key="cell.dateStr"
