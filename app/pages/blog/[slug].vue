@@ -22,6 +22,16 @@ definePageMeta({ middleware: 'auth' })
 const route = useRoute()
 const slug = route.params.slug as string
 
+const backLink = computed(() => {
+  const page = Number(route.query.page)
+  if (!page || page <= 1) return '/blog'
+  const q: Record<string, string> = {}
+  if (route.query.sort) q.sort = route.query.sort as string
+  if (route.query.category) q.category = route.query.category as string
+  if (route.query.draft) q.draft = route.query.draft as string
+  return { path: `/blog/page/${page}`, query: q }
+})
+
 const loaded = ref(false)
 const categorySuggestions = ref<string[]>([])
 const frontmatter = ref<Frontmatter>({
@@ -113,7 +123,7 @@ async function deleteArticle() {
     <!-- toolbar -->
     <div class="flex items-center gap-3 border-b border-border px-4 py-2 shrink-0">
       <Button variant="ghost" size="sm" as-child>
-        <NuxtLink to="/blog"><AlignLeft />一覧</NuxtLink>
+        <NuxtLink :to="backLink"><AlignLeft />一覧</NuxtLink>
       </Button>
       <span class="text-sm text-muted-foreground truncate">{{ slug }}</span>
       <span v-if="isDirty" class="text-amber-400 text-xs leading-none" title="未保存の変更があります">●</span>

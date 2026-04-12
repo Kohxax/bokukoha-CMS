@@ -82,6 +82,15 @@ function pageLink(page: number) {
   return { path: `/work/page/${page}`, query: buildQuery({}) }
 }
 
+function articleLink(slug: string) {
+  const q: Record<string, string | number> = {}
+  if (currentPage.value > 1) q.page = currentPage.value
+  if (sortOrder.value !== 'newest') q.sort = sortOrder.value
+  if (categoryFilter.value !== 'all') q.category = categoryFilter.value
+  if (draftFilter.value !== 'all') q.draft = draftFilter.value
+  return { path: `/work/${slug}`, query: q }
+}
+
 function setSort(value: string) {
   const q = buildQuery({})
   delete q.sort
@@ -193,7 +202,7 @@ const displayPages = computed(() => {
         <NuxtLink
           v-for="article in pagedArticles"
           :key="article.slug"
-          :to="`/work/${article.slug}`"
+          :to="articleLink(article.slug)"
           class="flex items-center gap-3 rounded-lg border border-border bg-card p-2 hover:bg-accent transition-colors"
         >
           <div class="min-w-0 flex-1">
