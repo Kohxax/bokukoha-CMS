@@ -378,7 +378,7 @@ async function upload() {
         :key="item.key"
         class="rounded-lg border border-border bg-card overflow-hidden"
       >
-        <div class="relative aspect-square bg-muted cursor-zoom-in" @click="openViewer(item.url)">
+        <div class="relative aspect-square bg-muted cursor-pointer" @click="openViewer(item.url)">
           <img
             :src="item.url"
             :alt="fileName(item.key)"
