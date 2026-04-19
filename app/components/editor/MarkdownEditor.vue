@@ -65,7 +65,11 @@ onMounted(async () => {
         }),
         EditorView.theme({
           '&': { height: '100%', width: '100%', fontSize: '13px' },
-          '.cm-scroller': { overflow: 'auto', overflowX: 'hidden', fontFamily: "'Fira Code', 'Consolas', monospace" },
+          '.cm-scroller': { overflow: 'auto', overflowX: 'hidden', fontFamily: "'Fira Code', 'Consolas', monospace", scrollbarWidth: 'thin', scrollbarColor: '#3f3f46 transparent' },
+          '.cm-scroller::-webkit-scrollbar': { width: '6px', height: '6px' },
+          '.cm-scroller::-webkit-scrollbar-track': { background: 'transparent' },
+          '.cm-scroller::-webkit-scrollbar-thumb': { background: '#3f3f46', borderRadius: '3px' },
+          '.cm-scroller::-webkit-scrollbar-thumb:hover': { background: '#71717a' },
           '.cm-content': { maxWidth: '100%' },
         }),
       ],
