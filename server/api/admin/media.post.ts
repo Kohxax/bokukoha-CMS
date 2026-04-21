@@ -1,7 +1,9 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import sharp from 'sharp'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_DIMENSION = 2048
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -30,16 +32,35 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  const filename = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+  const isGif = file.type === 'image/gif'
+  const baseName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.[^.]+$/, '')
+
+  let buffer: Buffer
+  let contentType: string
+  let filename: string
+
+  if (isGif) {
+    buffer = rawBuffer
+    contentType = 'image/gif'
+    filename = `${baseName}.gif`
+  } else {
+    buffer = await sharp(rawBuffer)
+      .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 85 })
+      .toBuffer()
+    contentType = 'image/webp'
+    filename = `${baseName}.webp`
+  }
+
   const key = `${collection}/${slug}/${filename}`
-  const buffer = Buffer.from(await file.arrayBuffer())
 
   await s3.send(
     new PutObjectCommand({
       Bucket: config.r2BucketName,
       Key: key,
       Body: buffer,
-      ContentType: file.type,
+      ContentType: contentType,
     }),
   )
 
