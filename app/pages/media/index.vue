@@ -200,9 +200,34 @@ const uploadFile = ref<File | null>(null)
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 
+const cropOpen = ref(false)
+const cropSrc = ref('')
+const cropMimeType = ref('image/jpeg')
+const cropFileName = ref('')
+
 function onFileChange(e: Event) {
   const target = e.target as HTMLInputElement
-  uploadFile.value = target.files?.[0] ?? null
+  const file = target.files?.[0]
+  target.value = ''
+  if (!file) return
+  if (cropSrc.value) URL.revokeObjectURL(cropSrc.value)
+  cropSrc.value = URL.createObjectURL(file)
+  cropMimeType.value = file.type
+  cropFileName.value = file.name
+  cropOpen.value = true
+}
+
+function onCropConfirm(file: File) {
+  cropOpen.value = false
+  URL.revokeObjectURL(cropSrc.value)
+  cropSrc.value = ''
+  uploadFile.value = file
+}
+
+function onCropCancel() {
+  cropOpen.value = false
+  URL.revokeObjectURL(cropSrc.value)
+  cropSrc.value = ''
 }
 
 async function upload() {
@@ -220,7 +245,6 @@ async function upload() {
     toast.success('アップロードしました')
     await navigator.clipboard.writeText(res.url).catch(() => {})
     uploadFile.value = null
-    if (fileInput.value) fileInput.value.value = ''
     await refresh()
   } catch (e: any) {
     toast.error(e?.data?.message ?? 'アップロードに失敗しました')
@@ -463,4 +487,13 @@ async function upload() {
   </Dialog>
 
   <ImageViewer />
+
+  <ImageCropDialog
+    :open="cropOpen"
+    :image-src="cropSrc"
+    :mime-type="cropMimeType"
+    :file-name="cropFileName"
+    @confirm="onCropConfirm"
+    @update:open="(v) => { cropOpen = v; if (!v) onCropCancel() }"
+  />
 </template>

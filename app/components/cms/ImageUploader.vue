@@ -14,6 +14,32 @@ const uploading = ref(false)
 const isDragging = ref(false)
 const fileInput = ref<HTMLInputElement>()
 
+const cropOpen = ref(false)
+const cropSrc = ref('')
+const cropMimeType = ref('image/jpeg')
+const cropFileName = ref('')
+
+function openCrop(file: File) {
+  if (cropSrc.value) URL.revokeObjectURL(cropSrc.value)
+  cropSrc.value = URL.createObjectURL(file)
+  cropMimeType.value = file.type
+  cropFileName.value = file.name
+  cropOpen.value = true
+}
+
+function onCropCancel() {
+  cropOpen.value = false
+  URL.revokeObjectURL(cropSrc.value)
+  cropSrc.value = ''
+}
+
+async function onCropConfirm(file: File) {
+  cropOpen.value = false
+  URL.revokeObjectURL(cropSrc.value)
+  cropSrc.value = ''
+  await uploadFile(file)
+}
+
 async function uploadFile(file: File) {
   if (!props.slug) {
     toast.error('先にslugを入力してください')
@@ -40,13 +66,14 @@ async function uploadFile(file: File) {
 
 function onFileChange(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
-  if (file) uploadFile(file)
+  if (file) openCrop(file)
+  ;(event.target as HTMLInputElement).value = ''
 }
 
 function onDrop(event: DragEvent) {
   isDragging.value = false
   const file = event.dataTransfer?.files[0]
-  if (file) uploadFile(file)
+  if (file) openCrop(file)
 }
 
 function openPicker() {
@@ -89,4 +116,13 @@ defineExpose({ openPicker })
     </Button>
     <p class="text-xs text-muted-foreground">JPEG / PNG / WebP / GIF, 最大 10MB</p>
   </div>
+
+  <ImageCropDialog
+    :open="cropOpen"
+    :image-src="cropSrc"
+    :mime-type="cropMimeType"
+    :file-name="cropFileName"
+    @confirm="onCropConfirm"
+    @update:open="(v) => { cropOpen = v; if (!v) onCropCancel() }"
+  />
 </template>
