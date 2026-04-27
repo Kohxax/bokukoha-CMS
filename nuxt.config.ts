@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     },
   },
 
-  css: ['~/assets/css/main.css', 'vue-sonner/style.css', 'vue-advanced-cropper/dist/style.css'],
+  css: ['~/assets/css/main.css', 'vue-sonner/style.css'],
 
   vite: {
     plugins: [tailwindcss()],

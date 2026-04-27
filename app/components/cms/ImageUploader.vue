@@ -18,12 +18,14 @@ const cropOpen = ref(false)
 const cropSrc = ref('')
 const cropMimeType = ref('image/jpeg')
 const cropFileName = ref('')
+const cropOriginalFile = ref<File | undefined>()
 
 function openCrop(file: File) {
   if (cropSrc.value) URL.revokeObjectURL(cropSrc.value)
   cropSrc.value = URL.createObjectURL(file)
   cropMimeType.value = file.type
   cropFileName.value = file.name
+  cropOriginalFile.value = file
   cropOpen.value = true
 }
 
@@ -31,12 +33,14 @@ function onCropCancel() {
   cropOpen.value = false
   URL.revokeObjectURL(cropSrc.value)
   cropSrc.value = ''
+  cropOriginalFile.value = undefined
 }
 
 async function onCropConfirm(file: File) {
   cropOpen.value = false
   URL.revokeObjectURL(cropSrc.value)
   cropSrc.value = ''
+  cropOriginalFile.value = undefined
   await uploadFile(file)
 }
 
@@ -120,6 +124,7 @@ defineExpose({ openPicker })
   <ImageCropDialog
     :open="cropOpen"
     :image-src="cropSrc"
+    :original-file="cropOriginalFile"
     :mime-type="cropMimeType"
     :file-name="cropFileName"
     @confirm="onCropConfirm"

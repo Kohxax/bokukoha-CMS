@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Cropper } from 'vue-advanced-cropper'
+import Cropper from 'cropperjs'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 const props = defineProps<{
   open: boolean
   imageSrc: string
+  originalFile?: File
   mimeType?: string
   fileName?: string
 }>()
@@ -32,22 +33,53 @@ const RATIOS: RatioOption[] = [
 ]
 
 const selectedRatio = ref<RatioOption>(FREE_RATIO)
-const cropperRef = ref<InstanceType<typeof Cropper> | null>(null)
+const imgRef = ref<HTMLImageElement | null>(null)
+let cropperInstance: Cropper | null = null
 
-const stencilProps = computed(() =>
-  selectedRatio.value.value !== undefined
-    ? { aspectRatio: selectedRatio.value.value }
-    : {},
+function initCropper() {
+  if (!imgRef.value) return
+  cropperInstance?.destroy()
+  cropperInstance = new Cropper(imgRef.value, {
+    viewMode: 1,
+    dragMode: 'move',
+    autoCropArea: 0.8,
+    restore: false,
+    guides: true,
+    center: true,
+    highlight: false,
+    cropBoxMovable: true,
+    cropBoxResizable: true,
+    toggleDragModeOnDblclick: false,
+    aspectRatio: selectedRatio.value.value ?? NaN,
+  })
+}
+
+function destroyCropper() {
+  cropperInstance?.destroy()
+  cropperInstance = null
+}
+
+watch(
+  () => props.open,
+  (val) => {
+    if (!val) {
+      destroyCropper()
+      selectedRatio.value = FREE_RATIO
+    }
+  },
 )
 
+watch(selectedRatio, (ratio) => {
+  cropperInstance?.setAspectRatio(ratio.value ?? NaN)
+})
+
 function close() {
-  selectedRatio.value = FREE_RATIO
   emit('update:open', false)
 }
 
 function onConfirm() {
-  if (!cropperRef.value) return
-  const { canvas } = cropperRef.value.getResult()
+  if (!cropperInstance) return
+  const canvas = cropperInstance.getCroppedCanvas()
   if (!canvas) return
   const mime = props.mimeType ?? 'image/jpeg'
   canvas.toBlob(
@@ -55,7 +87,6 @@ function onConfirm() {
       if (!blob) return
       const file = new File([blob], props.fileName ?? 'image.jpg', { type: mime })
       emit('confirm', file)
-      selectedRatio.value = FREE_RATIO
     },
     mime,
     0.92,
@@ -65,7 +96,7 @@ function onConfirm() {
 
 <template>
   <Dialog :open="open" @update:open="(v) => !v && close()">
-    <DialogContent class="sm:max-w-2xl gap-4 max-h-[90vh] overflow-y-auto">
+    <DialogContent class="sm:max-w-2xl gap-4">
       <DialogHeader>
         <DialogTitle>画像をクロップ</DialogTitle>
       </DialogHeader>
@@ -84,22 +115,34 @@ function onConfirm() {
       </div>
 
       <div class="cropper-host">
-        <Cropper
-          ref="cropperRef"
-          :key="imageSrc"
+        <img
+          v-if="open && imageSrc"
+          ref="imgRef"
           :src="imageSrc"
-          :stencil-props="stencilProps"
-          style="height: 100%; width: 100%;"
-        />
+          alt="crop target"
+          style="display: block; max-width: 100%;"
+          @load="initCropper"
+        >
       </div>
 
       <DialogFooter class="gap-2">
         <Button variant="outline" @click="close">キャンセル</Button>
+        <Button
+          v-if="originalFile"
+          variant="secondary"
+          @click="emit('confirm', originalFile)"
+        >
+          そのまま使用
+        </Button>
         <Button @click="onConfirm">クロップして使用</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
 </template>
+
+<style>
+@import 'cropperjs/dist/cropper.css';
+</style>
 
 <style scoped>
 .cropper-host {
@@ -109,10 +152,6 @@ function onConfirm() {
   position: relative;
   overflow: hidden;
   border-radius: 6px;
-}
-
-.cropper-host :deep(.vue-advanced-cropper) {
-  height: 100%;
-  width: 100%;
+  background: #111;
 }
 </style>
