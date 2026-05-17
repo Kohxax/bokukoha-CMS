@@ -17,7 +17,7 @@ import {
 } from '~/components/ui/sidebar'
 import { Button } from '~/components/ui/button'
 import { Toaster } from '~/components/ui/sonner'
-import { BookText, Briefcase, Images, LogOut, Rocket } from 'lucide-vue-next'
+import { BookText, Briefcase, Images, LogOut, Rocket, MessageSquare } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import Avatar from '~/components/ui/avatar/Avatar.vue'
 import {
@@ -66,6 +66,7 @@ const navItems = [
 ]
 
 const mediaItem = { title: 'Media', url: '/media', icon: Images, countKey: 'media' as const }
+const commentsItem = { title: 'Comments', url: '/comments', icon: MessageSquare, countKey: 'comments' as const }
 
 </script>
 
@@ -117,6 +118,20 @@ const mediaItem = { title: 'Media', url: '/media', icon: Images, countKey: 'medi
                   </NuxtLink>
                 </SidebarMenuButton>
                 <SidebarMenuBadge v-if="counts">{{ counts[mediaItem.countKey] }}</SidebarMenuBadge>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  as-child
+                  :data-active="route.path.startsWith(commentsItem.url)"
+                >
+                  <NuxtLink :to="commentsItem.url">
+                    <component :is="commentsItem.icon" />
+                    <span>{{ commentsItem.title }}</span>
+                  </NuxtLink>
+                </SidebarMenuButton>
+                <SidebarMenuBadge v-if="counts && counts[commentsItem.countKey] > 0">
+                  {{ counts[commentsItem.countKey] }}
+                </SidebarMenuBadge>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

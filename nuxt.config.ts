@@ -66,6 +66,10 @@ export default defineNuxtConfig({
     r2PublicUrl: 'https://images.bokukoha.dev',
     dbPath: '/app/data/cms.db',
     cfDeployHookUrl: '',
+    dynamodbRegion: 'ap-northeast-1',
+    dynamodbAccessKeyId: '',
+    dynamodbSecretAccessKey: '',
+    dynamodbTable: 'bokukoha-comments',
   },
 
   routeRules: {

@@ -99,6 +99,13 @@ html {
   }
 }
 
+.cms-checkbox {
+  @apply size-4 shrink-0 rounded-[4px] border border-input bg-background shadow-xs transition-shadow flex items-center justify-center;
+}
+.cms-checkbox[data-checked="true"] {
+  @apply bg-primary border-primary text-primary-foreground;
+}
+
 .underline-animated::after {
   content: '';
   position: absolute;
