@@ -6,7 +6,7 @@ import FrontmatterForm from '~/components/cms/FrontmatterForm.vue'
 import type { Frontmatter } from '~/components/cms/FrontmatterForm.vue'
 import MarkdownEditor from '~/components/editor/MarkdownEditor.vue'
 import MarkdownPreview from '~/components/editor/MarkdownPreview.vue'
-import { AlignLeft } from 'lucide-vue-next'
+import { AlignLeft, MessageSquare } from 'lucide-vue-next'
 import { useEventListener } from '@vueuse/core'
 import {
   Dialog,
@@ -16,11 +16,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
+import ArticleComments from '~/components/cms/ArticleComments.vue'
 
 definePageMeta({ middleware: 'auth' })
 
 const route = useRoute()
 const slug = route.params.slug as string
+const articleId = `blog_${slug}`
+const asideTab = ref<'settings' | 'comments'>('settings')
 
 const backLink = computed(() => {
   const page = Number(route.query.page)
@@ -135,9 +138,29 @@ async function deleteArticle() {
     </div>
 
     <div v-if="loaded" class="flex flex-1 overflow-hidden">
-      <!-- sidebar: frontmatter (desktop only) -->
-      <aside class="hidden md:block w-72 shrink-0 border-r border-border overflow-y-auto p-4">
-        <FrontmatterForm v-model="frontmatter" collection="blog" :slug="slug" :category-suggestions="categorySuggestions" />
+      <!-- sidebar: frontmatter / comments (desktop only) -->
+      <aside class="hidden md:flex flex-col w-72 shrink-0 border-r border-border overflow-hidden">
+        <!-- Tab switcher -->
+        <div class="flex border-b border-border shrink-0">
+          <button
+            class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors"
+            :class="asideTab === 'settings' ? 'text-foreground border-b-2 border-primary -mb-px' : 'text-muted-foreground hover:text-foreground'"
+            @click="asideTab = 'settings'"
+          >設定</button>
+          <button
+            class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors"
+            :class="asideTab === 'comments' ? 'text-foreground border-b-2 border-primary -mb-px' : 'text-muted-foreground hover:text-foreground'"
+            @click="asideTab = 'comments'"
+          >
+            <MessageSquare class="size-3.5" />コメント
+          </button>
+        </div>
+        <div v-show="asideTab === 'settings'" class="flex-1 overflow-y-auto p-4">
+          <FrontmatterForm v-model="frontmatter" collection="blog" :slug="slug" :category-suggestions="categorySuggestions" />
+        </div>
+        <div v-show="asideTab === 'comments'" class="flex-1 overflow-hidden">
+          <ArticleComments :article-id="articleId" />
+        </div>
       </aside>
 
       <!-- editor + preview -->
@@ -151,13 +174,14 @@ async function deleteArticle() {
         </div>
       </div>
 
-      <!-- mobile: 3 tabs -->
+      <!-- mobile: 4 tabs -->
       <div class="flex md:hidden flex-1 overflow-hidden">
         <Tabs default-value="editor" class="flex flex-col flex-1 overflow-hidden">
           <TabsList class="mx-3 mt-2 shrink-0">
             <TabsTrigger value="frontmatter" class="flex-1">設定</TabsTrigger>
             <TabsTrigger value="editor" class="flex-1">エディタ</TabsTrigger>
             <TabsTrigger value="preview" class="flex-1">プレビュー</TabsTrigger>
+            <TabsTrigger value="comments" class="flex-1">コメント</TabsTrigger>
           </TabsList>
           <TabsContent value="frontmatter" class="flex-1 overflow-y-auto p-3 mt-0">
             <FrontmatterForm v-model="frontmatter" collection="blog" :slug="slug" :category-suggestions="categorySuggestions" />
@@ -167,6 +191,9 @@ async function deleteArticle() {
           </TabsContent>
           <TabsContent value="preview" class="flex-1 overflow-hidden p-3 mt-0">
             <MarkdownPreview :content="body" :frontmatter="frontmatter" />
+          </TabsContent>
+          <TabsContent value="comments" class="flex-1 overflow-hidden mt-0">
+            <ArticleComments :article-id="articleId" />
           </TabsContent>
         </Tabs>
       </div>

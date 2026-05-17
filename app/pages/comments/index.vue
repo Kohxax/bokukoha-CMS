@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { Check, MessageSquare, X, Trash2, CheckCircle, EyeOff, Eye } from 'lucide-vue-next'
+import { Check, MessageSquare, X, Trash2, CheckCircle, EyeOff, Eye, Send } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ middleware: 'auth' })
@@ -195,6 +195,41 @@ async function restore(comment: Comment) {
   }
 }
 
+// ── Admin Reply ───────────────────────────────────────────────────────────────
+
+const replyingTo = ref<string | null>(null)
+const replyContent = ref('')
+const replying = ref(false)
+
+function openReply(comment: Comment) {
+  if (replyingTo.value === comment.commentId) {
+    replyingTo.value = null
+    replyContent.value = ''
+    return
+  }
+  replyingTo.value = comment.commentId
+  replyContent.value = ''
+}
+
+async function submitReply(comment: Comment) {
+  if (!replyContent.value.trim()) return
+  replying.value = true
+  try {
+    await $fetch('/api/admin/comments', {
+      method: 'POST',
+      body: { articleId: comment.articleId, content: replyContent.value, parentId: comment.commentId },
+    })
+    replyingTo.value = null
+    replyContent.value = ''
+    toast.success('返信しました')
+    await load()
+  } catch {
+    toast.error('返信に失敗しました')
+  } finally {
+    replying.value = false
+  }
+}
+
 // ── Display helpers ───────────────────────────────────────────────────────────
 
 const statusLabel: Record<string, string> = {
@@ -365,6 +400,19 @@ const truncate = (s: string | undefined, n: number) =>
                 <CheckCircle class="size-3 mr-1" />
                 承認
               </Button>
+              <!-- Reply (for approved top-level only) -->
+              <Button
+                v-if="comment.status === 'approved' && !comment.parentId"
+                size="sm"
+                variant="ghost"
+                class="h-7 px-2 text-xs"
+                :class="replyingTo === comment.commentId ? 'text-primary' : 'text-muted-foreground hover:text-foreground'"
+                :disabled="processing || replying"
+                @click="openReply(comment)"
+                title="管理者として返信"
+              >
+                <MessageSquare class="size-3" />
+              </Button>
               <!-- Hide (for approved only) -->
               <Button
                 v-if="comment.status === 'approved'"
@@ -400,6 +448,27 @@ const truncate = (s: string | undefined, n: number) =>
               >
                 <Trash2 class="size-3" />
               </Button>
+            </div>
+          </div>
+
+          <!-- Inline admin reply form -->
+          <div v-if="replyingTo === comment.commentId" class="px-3 pb-3 ml-9">
+            <div class="border border-primary/30 rounded-md p-2 bg-primary/5">
+              <p class="text-[10px] text-primary mb-1.5 font-medium">管理者（こは）として返信</p>
+              <textarea
+                v-model="replyContent"
+                rows="2"
+                placeholder="返信内容..."
+                class="w-full bg-transparent text-xs focus:outline-none placeholder:text-muted-foreground/40 resize-none border-b border-border/40 pb-1"
+              />
+              <div class="flex justify-end gap-2 mt-1.5">
+                <button class="text-xs text-muted-foreground hover:text-foreground" @click="replyingTo=null; replyContent=''">
+                  キャンセル
+                </button>
+                <Button size="sm" class="h-6 text-xs" :disabled="!replyContent.trim() || replying" @click="submitReply(comment)">
+                  <Send class="size-3 mr-1" />{{ replying ? '送信中...' : '返信' }}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
