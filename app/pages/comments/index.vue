@@ -57,7 +57,12 @@ async function load() {
   comments.value = await $fetch<Comment[]>('/api/admin/comments', { params })
 }
 
-onMounted(load)
+const { markAsRead } = useCommentNotifications()
+
+onMounted(async () => {
+  await load()
+  await markAsRead()
+})
 watch([statusFilter, articleIdFilter], load)
 
 function setStatus(value: string) {

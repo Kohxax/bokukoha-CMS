@@ -17,7 +17,7 @@ import {
 } from '~/components/ui/sidebar'
 import { Button } from '~/components/ui/button'
 import { Toaster } from '~/components/ui/sonner'
-import { BookText, Briefcase, Images, LogOut, Rocket, MessageSquare } from 'lucide-vue-next'
+import { BookText, Briefcase, Images, LogOut, Rocket, MessageSquare, Bell } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import Avatar from '~/components/ui/avatar/Avatar.vue'
 import {
@@ -52,6 +52,13 @@ async function confirmDeploy() {
   } finally {
     deploying.value = false
   }
+}
+
+const { unreadCount, markAsRead } = useCommentNotifications()
+
+async function goToComments() {
+  await markAsRead()
+  await navigateTo('/comments')
 }
 
 const { data: counts } = useAsyncData(
@@ -163,6 +170,19 @@ const commentsItem = { title: 'Comments', url: '/comments', icon: MessageSquare,
       <header class="flex h-12 items-center gap-2 border-b border-border px-4">
         <SidebarTrigger class="-ml-1" />
         <div class="flex-1" />
+        <button
+          class="relative rounded-md p-1.5 hover:bg-accent transition-colors"
+          :title="unreadCount > 0 ? `新着コメント ${unreadCount}件` : 'コメント'"
+          @click="goToComments"
+        >
+          <Bell class="size-4" />
+          <span
+            v-if="unreadCount > 0"
+            class="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white"
+          >
+            {{ unreadCount > 99 ? '99+' : unreadCount }}
+          </span>
+        </button>
         <Button
           class="md:hidden"
           size="sm"
