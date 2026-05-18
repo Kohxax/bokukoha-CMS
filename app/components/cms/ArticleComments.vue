@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { Check, CheckCircle, ChevronDown, ChevronRight, Eye, EyeOff, MessageSquare, Send, Trash2 } from 'lucide-vue-next'
+import { Check, CheckCircle, ChevronDown, ChevronRight, Eye, EyeOff, MessageSquare, Pin, PinOff, Send, Trash2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 interface Comment {
@@ -20,6 +20,7 @@ interface Comment {
   parentId?: string | null
   status: string
   isAdmin?: boolean
+  pinned?: boolean
   filterScore?: number
   filterReasons?: string[]
   moderationReason?: string
@@ -62,7 +63,11 @@ function buildTree(items: Comment[]): Comment[] {
     }
     roots.push(item)
   }
-  return roots.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+  return roots.sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1
+    if (!a.pinned && b.pinned) return 1
+    return a.createdAt.localeCompare(b.createdAt)
+  })
 }
 
 async function approve(comment: Comment) {
@@ -103,6 +108,19 @@ async function restore(comment: Comment) {
       body: { articleId: comment.articleId, status: 'approved' },
     })
     toast.success('再表示しました')
+    await load()
+  } catch { toast.error('操作に失敗しました') }
+}
+
+async function togglePin(comment: Comment) {
+  const next = !comment.pinned
+  try {
+    await $fetch(`/api/admin/comments/${comment.commentId}`, {
+      method: 'PATCH',
+      body: { articleId: comment.articleId, pinned: next },
+    })
+    comment.pinned = next
+    toast.success(next ? 'ピン止めしました' : 'ピン止めを解除しました')
     await load()
   } catch { toast.error('操作に失敗しました') }
 }
@@ -271,6 +289,7 @@ const total = computed(() => countAll(comments.value))
                     class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium"
                     :class="statusClass[comment.status] ?? 'bg-muted text-muted-foreground'"
                   >{{ statusLabel[comment.status] ?? comment.status }}</span>
+                  <Pin v-if="comment.pinned" class="size-3 text-amber-400 shrink-0" />
                   <span class="text-[11px] text-muted-foreground ml-auto">{{ formatDate(comment.createdAt) }}</span>
                 </div>
 
@@ -318,6 +337,19 @@ const total = computed(() => countAll(comments.value))
                       :disabled="processing" @click="openDelete(comment)"
                     >
                       <Trash2 class="size-3 mr-0.5" />削除
+                    </Button>
+                    <Button
+                      v-if="comment.status === 'approved'"
+                      size="sm" variant="ghost"
+                      class="h-6 px-1.5 text-[11px]"
+                      :class="comment.pinned ? 'text-amber-400 hover:text-amber-300' : 'text-muted-foreground hover:text-foreground'"
+                      :disabled="processing"
+                      :title="comment.pinned ? 'ピン止めを解除' : 'ピン止め'"
+                      @click="togglePin(comment)"
+                    >
+                      <PinOff v-if="comment.pinned" class="size-3 mr-0.5" />
+                      <Pin v-else class="size-3 mr-0.5" />
+                      {{ comment.pinned ? '解除' : 'ピン' }}
                     </Button>
                     <Button
                       v-if="!comment.parentId && comment.status === 'approved'"

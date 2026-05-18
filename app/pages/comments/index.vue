@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { Check, MessageSquare, X, Trash2, CheckCircle, EyeOff, Eye, Send } from 'lucide-vue-next'
+import { Check, MessageSquare, X, Trash2, CheckCircle, EyeOff, Eye, Send, Pin, PinOff } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ middleware: 'auth' })
@@ -31,6 +31,7 @@ interface Comment {
   content?: string
   parentId?: string | null
   status: string
+  pinned?: boolean
   filterScore?: number
   filterReasons?: string[]
   moderationReason?: string
@@ -200,6 +201,23 @@ async function restore(comment: Comment) {
   }
 }
 
+// ── Pin ───────────────────────────────────────────────────────────────────────
+
+async function togglePin(comment: Comment) {
+  const next = !comment.pinned
+  try {
+    await $fetch(`/api/admin/comments/${comment.commentId}`, {
+      method: 'PATCH',
+      body: { articleId: comment.articleId, pinned: next },
+    })
+    const item = comments.value?.find((c) => c.commentId === comment.commentId)
+    if (item) item.pinned = next
+    toast.success(next ? 'ピン止めしました' : 'ピン止めを解除しました')
+  } catch {
+    toast.error('操作に失敗しました')
+  }
+}
+
 // ── Admin Reply ───────────────────────────────────────────────────────────────
 
 const replyingTo = ref<string | null>(null)
@@ -345,6 +363,9 @@ const truncate = (s: string | undefined, n: number) =>
               </span>
             </label>
 
+            <!-- Pinned badge -->
+            <Pin v-if="comment.pinned" class="mt-1 size-3.5 shrink-0 text-amber-400" />
+
             <!-- Status badge -->
             <span
               class="mt-0.5 shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
@@ -405,6 +426,21 @@ const truncate = (s: string | undefined, n: number) =>
                 <CheckCircle class="size-3 mr-1" />
                 承認
               </Button>
+              <!-- Pin / Unpin (approved top-level only) -->
+              <Button
+                v-if="comment.status === 'approved' && !comment.parentId"
+                size="sm"
+                variant="ghost"
+                class="h-7 px-2 text-xs"
+                :class="comment.pinned ? 'text-amber-400 hover:text-amber-300' : 'text-muted-foreground hover:text-foreground'"
+                :disabled="processing"
+                :title="comment.pinned ? 'ピン止めを解除' : 'ピン止め'"
+                @click="togglePin(comment)"
+              >
+                <PinOff v-if="comment.pinned" class="size-3" />
+                <Pin v-else class="size-3" />
+              </Button>
+
               <!-- Reply (for approved top-level only) -->
               <Button
                 v-if="comment.status === 'approved' && !comment.parentId"
