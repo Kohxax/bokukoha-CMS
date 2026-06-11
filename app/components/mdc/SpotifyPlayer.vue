@@ -57,5 +57,9 @@ const embedHeight = computed(() => {
     >
       Invalid Spotify URL
     </div>
+
+    <p v-if="$slots.default" class="text-md text-center text-muted-foreground mt-2">
+      <slot mdc-unwrap="p" />
+    </p>
   </div>
 </template>
