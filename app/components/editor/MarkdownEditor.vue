@@ -180,6 +180,12 @@ const componentSnippets = [
     snippet: '::VideoPlayer{src="https://"}\n::',
     cursorOffset: '::VideoPlayer{src="'.length,
   },
+  {
+    label: 'SpotifyPlayer',
+    description: 'Spotifyの楽曲・アルバム・プレイリスト',
+    snippet: '::SpotifyPlayer{src="https://open.spotify.com/"}\n::',
+    cursorOffset: '::SpotifyPlayer{src="'.length,
+  },
 ]
 
 // クリック外でメニューを閉じる
