@@ -109,7 +109,7 @@ export default defineNuxtConfig({
         'X-Frame-Options': 'DENY',
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.bokukoha.dev blob:; connect-src 'self'; font-src 'self' data:; worker-src 'self'; frame-ancestors 'none';",
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.bokukoha.dev blob:; connect-src 'self'; font-src 'self' data:; worker-src 'self'; frame-src https://www.youtube.com https://embed.nicovideo.jp https://open.spotify.com; frame-ancestors 'none';",
       },
     },
   },
