@@ -40,7 +40,7 @@ const embedHeight = computed(() => {
 </script>
 
 <template>
-  <div class="my-8">
+  <figure class="my-8">
     <iframe
       v-if="embedUrl"
       :src="embedUrl"
@@ -58,8 +58,8 @@ const embedHeight = computed(() => {
       Invalid Spotify URL
     </div>
 
-    <p v-if="$slots.default" class="text-md text-center text-muted-foreground mt-2">
+    <figcaption v-if="$slots.default" class="text-base text-center text-muted-foreground mt-2">
       <slot mdc-unwrap="p" />
-    </p>
-  </div>
+    </figcaption>
+  </figure>
 </template>
