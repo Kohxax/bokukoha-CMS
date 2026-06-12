@@ -46,7 +46,7 @@ const embedHeight = computed(() => {
       :src="embedUrl"
       :height="embedHeight"
       width="100%"
-      class="w-full rounded-lg shadow-lg"
+      class="w-full rounded-xl shadow-xl"
       frameborder="0"
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       loading="lazy"
