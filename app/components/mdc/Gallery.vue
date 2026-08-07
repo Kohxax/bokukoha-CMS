@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
   <div class="relative w-full overflow-hidden group mb-7">
     <div
       ref="container"
-      class="gallery overflow-x-auto snap-x snap-mandatory flex scroll-smooth rounded-lg aspect-video"
+      class="gallery content-media-frame flex aspect-video snap-x snap-mandatory overflow-x-auto scroll-smooth"
     >
       <div
         v-for="(img, idx) in images"
@@ -89,29 +89,36 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="flex justify-center gap-2 mt-3">
-      <span
+      <button
         v-for="(img, idx) in images"
         :key="idx"
+        type="button"
         @click="((currentIndex = idx), stopAutoSlide())"
+        :aria-label="`${idx + 1}枚目の画像を表示`"
+        :aria-current="currentIndex === idx ? 'true' : undefined"
         :class="[
-          'w-2 h-2 rounded-full transition-colors cursor-pointer',
-          currentIndex === idx ? 'bg-white' : 'bg-white/50',
+          'size-2.5 cursor-pointer rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          currentIndex === idx ? 'bg-primary' : 'bg-surface-container-highest hover:bg-primary/60',
         ]"
-      ></span>
+      />
     </div>
 
     <button
       v-if="currentIndex > 0"
+      type="button"
       @click="prev"
-      class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-card text-foreground p-2 rounded-full transition-opacity duration-200 opacity-50 group-hover:opacity-70 disabled:opacity-20 cursor-pointer"
+      class="m3-state-layer absolute left-2 top-1/2 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-primary-container text-primary-container-foreground opacity-80 transition-opacity group-hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      aria-label="前の画像"
     >
       <ChevronLeft />
     </button>
 
     <button
       v-if="images.length > 1"
+      type="button"
       @click="next(true)"
-      class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-card text-foreground p-2 rounded-full transition-opacity duration-200 opacity-40 group-hover:opacity-70 cursor-pointer"
+      class="m3-state-layer absolute right-2 top-1/2 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-primary-container text-primary-container-foreground opacity-80 transition-opacity group-hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      aria-label="次の画像"
     >
       <ChevronRight />
     </button>

@@ -1,7 +1,9 @@
 <template>
-  <div class="relative my-4 overflow-hidden rounded-lg border border-border bg-background">
+  <div
+    class="relative my-4 overflow-hidden rounded-2xl border border-border bg-surface-container-high shadow-[var(--elevation-1)]"
+  >
     <div
-      class="flex items-center justify-between border-b border-border bg-muted px-3 py-1 text-xs text-muted-foreground"
+      class="flex items-center justify-between border-b border-border bg-surface-container-highest px-3 py-1 text-xs text-muted-foreground"
     >
       <span v-if="filename" class="font-medium select-none">
         {{ filename }}
@@ -12,7 +14,7 @@
 
       <button
         type="button"
-        class="inline-flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        class="m3-state-layer inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         :class="{ 'text-emerald-500': isCopied, 'text-muted-foreground': !isCopied }"
         aria-label="Copy code"
         @click="handleCopy"
@@ -22,7 +24,7 @@
       </button>
     </div>
 
-    <pre :class="[$props.class, 'mt-0! mb-0! rounded-none! bg-background! p-4!']"><slot /></pre>
+    <pre :class="[$props.class, 'mt-0! mb-0! rounded-none! bg-surface-container-high! p-4!']"><slot /></pre>
   </div>
 </template>
 

@@ -47,7 +47,7 @@ const isNative = computed(() => {
   <div class="my-8">
     <div
       :class="[
-        'relative w-full rounded-lg overflow-hidden shadow-lg bg-black',
+        'content-media-frame relative w-full bg-black',
         isNative ? '' : 'aspect-video',
       ]"
     >
