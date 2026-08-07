@@ -242,18 +242,6 @@ html {
   word-break: break-all;
 }
 
-@media (min-width: 768px) {
-  .site-preview .article-prose :is(h1, h2, h3, h4, h5, h6) {
-    margin-left: -2.5rem;
-    padding-left: 2rem;
-  }
-
-  .site-preview .article-prose p {
-    font-size: 1.15rem;
-    line-height: 1.8;
-  }
-}
-
 .cms-checkbox {
   @apply size-4 shrink-0 rounded-[4px] border border-input bg-background shadow-xs transition-shadow flex items-center justify-center;
 }
