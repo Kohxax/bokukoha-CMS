@@ -237,12 +237,12 @@ const total = computed(() => countAll(comments.value))
 
     <!-- Admin post form -->
     <div class="px-4 py-3 border-b border-border shrink-0">
-      <div class="border-b border-border/40 pb-1">
+      <div>
         <textarea
           v-model="postContent"
           rows="1"
           placeholder="管理者として投稿..."
-          class="w-full bg-transparent text-xs focus:outline-none placeholder:text-muted-foreground/40 resize-none overflow-hidden"
+          class="m3-text-field w-full text-xs placeholder:text-muted-foreground/70 resize-none overflow-hidden"
           @focus="postExpanded = true"
           @input="(e) => { const el = e.target as HTMLTextAreaElement; el.style.height='auto'; el.style.height=el.scrollHeight+'px' }"
         />
@@ -367,7 +367,7 @@ const total = computed(() => countAll(comments.value))
                       v-model="replyContent"
                       rows="2"
                       placeholder="管理者として返信..."
-                      class="w-full bg-transparent text-xs border-b border-border/40 pb-1 focus:outline-none placeholder:text-muted-foreground/40 resize-none"
+                      class="m3-text-field min-h-20 w-full rounded-2xl text-xs placeholder:text-muted-foreground/70 resize-none"
                     />
                     <div class="flex justify-end gap-2 mt-1">
                       <button class="text-[11px] text-muted-foreground hover:text-foreground" @click="replyingTo=null; replyContent=''">

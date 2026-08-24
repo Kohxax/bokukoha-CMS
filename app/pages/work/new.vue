@@ -103,7 +103,7 @@ async function save() {
           <input
             v-model="slug"
             placeholder="my-work-slug"
-            class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            class="m3-text-field text-sm text-foreground placeholder:text-muted-foreground/70"
           >
         </div>
         <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
@@ -132,7 +132,7 @@ async function save() {
               <input
                 v-model="slug"
                 placeholder="my-work-slug"
-                class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                class="m3-text-field text-sm text-foreground placeholder:text-muted-foreground/70"
               >
             </div>
             <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />

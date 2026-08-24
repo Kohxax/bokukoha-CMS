@@ -203,7 +203,7 @@ const displayPages = computed(() => {
           v-for="article in pagedArticles"
           :key="article.slug"
           :to="articleLink(article.slug)"
-          class="flex items-center gap-3 rounded-lg border border-border bg-card p-2 hover:bg-accent transition-colors"
+          class="m3-interactive-card flex items-center gap-3 rounded-2xl border border-transparent bg-surface-container-low p-2 shadow-[var(--elevation-1)]"
         >
           <div class="min-w-0 flex-1">
             <p class="truncate font-medium text-sm">{{ article.title }}</p>
@@ -254,7 +254,7 @@ const displayPages = computed(() => {
       <div
         v-for="i in PAGE_SIZE"
         :key="i"
-        class="flex items-center gap-3 rounded-lg border border-border bg-card p-2"
+        class="flex items-center gap-3 rounded-2xl border border-transparent bg-surface-container-low p-2 shadow-[var(--elevation-1)]"
       >
         <div class="min-w-0 flex-1 space-y-2">
           <Skeleton class="h-4 w-2/3" />

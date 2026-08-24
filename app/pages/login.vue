@@ -39,7 +39,7 @@ async function submit() {
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-background">
-    <div class="w-full max-w-sm space-y-6 p-8 rounded-xl border border-border bg-card">
+    <div class="w-full max-w-sm space-y-6 p-8 rounded-3xl border border-transparent bg-surface-container-low shadow-[var(--elevation-2)]">
       <div class="space-y-1">
         <h1 class="text-2xl font-semibold tracking-tight text-foreground">
           ぼくこは.cms
@@ -59,7 +59,7 @@ async function submit() {
               type="password"
               autocomplete="current-password"
               required
-              class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              class="m3-text-field text-sm text-foreground placeholder:text-muted-foreground/70"
             >
           </div>
 
@@ -76,7 +76,7 @@ async function submit() {
               maxlength="6"
               autocomplete="one-time-code"
               placeholder="000000"
-              class="flex h-9 w-full rounded-md border border-input bg-input-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring tracking-widest"
+              class="m3-text-field text-sm text-foreground placeholder:text-muted-foreground/70 tracking-widest"
             >
           </div>
         </template>

@@ -230,7 +230,7 @@ defineExpose({ insertAtCursor })
 </script>
 
 <template>
-  <div class="flex flex-col h-full w-full overflow-hidden rounded-md border border-border">
+  <div class="flex flex-col h-full w-full overflow-hidden rounded-2xl border border-transparent bg-surface-container-low shadow-[var(--elevation-1)]">
     <!-- toolbar -->
     <div class="flex items-center gap-0.5 border-b border-border px-2 py-1 shrink-0 bg-card flex-wrap">
       <template v-for="(item, i) in toolbarActions" :key="i">
@@ -263,7 +263,7 @@ defineExpose({ insertAtCursor })
 
         <div
           v-show="showComponentMenu"
-          class="absolute top-full right-0 mt-1 z-50 min-w-44 rounded-md border border-border bg-card shadow-md py-1"
+          class="absolute top-full right-0 mt-1 z-50 min-w-44 rounded-xl border border-transparent bg-surface-container-high shadow-[var(--elevation-2)] py-1"
         >
           <button
             v-for="comp in componentSnippets"

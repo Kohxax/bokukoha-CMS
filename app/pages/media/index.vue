@@ -265,7 +265,7 @@ async function upload() {
     </div>
 
     <!-- アップロードフォーム -->
-    <div class="mb-6 rounded-lg border border-border bg-card p-4 space-y-3">
+    <div class="mb-6 rounded-2xl border border-transparent bg-surface-container-low p-4 space-y-3 shadow-[var(--elevation-1)]">
       <p class="text-sm font-medium flex items-center gap-2"><Upload class="size-4" /> アップロード</p>
       <div class="flex flex-wrap gap-2">
         <Select v-model="uploadCollection">
@@ -401,7 +401,7 @@ async function upload() {
       <div
         v-for="item in filteredItems"
         :key="item.key"
-        class="rounded-lg border border-border bg-card overflow-hidden"
+        class="rounded-2xl border border-transparent bg-surface-container-low overflow-hidden shadow-[var(--elevation-1)]"
       >
         <div class="relative aspect-square bg-muted cursor-pointer" @click="openViewer(item.url)">
           <img
@@ -450,7 +450,7 @@ async function upload() {
       v-else
       class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
     >
-      <div v-for="i in 12" :key="i" class="rounded-lg border border-border overflow-hidden">
+      <div v-for="i in 12" :key="i" class="rounded-2xl border border-transparent bg-surface-container-low overflow-hidden shadow-[var(--elevation-1)]">
         <Skeleton class="aspect-square w-full" />
         <div class="p-2 space-y-2">
           <Skeleton class="h-3 w-3/4" />

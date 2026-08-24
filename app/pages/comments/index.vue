@@ -351,8 +351,8 @@ const truncate = (s: string | undefined, n: number) =>
         <div
           v-for="comment in comments"
           :key="comment.commentId"
-          class="rounded-lg border bg-card overflow-hidden transition-colors"
-          :class="selected.has(comment.commentId) ? 'border-primary/40' : 'border-border'"
+          class="rounded-2xl border border-transparent bg-surface-container-low overflow-hidden shadow-[var(--elevation-1)] transition-[background-color,box-shadow]"
+          :class="selected.has(comment.commentId) ? 'bg-primary-container/40 ring-1 ring-primary/40' : ''"
         >
           <div class="flex items-start gap-3 p-3">
             <!-- Checkbox -->
@@ -494,13 +494,13 @@ const truncate = (s: string | undefined, n: number) =>
 
           <!-- Inline admin reply form -->
           <div v-if="replyingTo === comment.commentId" class="px-3 pb-3 ml-9">
-            <div class="border border-primary/30 rounded-md p-2 bg-primary/5">
+            <div class="rounded-2xl bg-primary-container/20 p-3">
               <p class="text-[10px] text-primary mb-1.5 font-medium">管理者（こは）として返信</p>
               <textarea
                 v-model="replyContent"
                 rows="2"
                 placeholder="返信内容..."
-                class="w-full bg-transparent text-xs focus:outline-none placeholder:text-muted-foreground/40 resize-none border-b border-border/40 pb-1"
+                class="m3-text-field min-h-20 w-full rounded-2xl text-xs placeholder:text-muted-foreground/70 resize-none"
               />
               <div class="flex justify-end gap-2 mt-1.5">
                 <button class="text-xs text-muted-foreground hover:text-foreground" @click="replyingTo=null; replyContent=''">
@@ -525,7 +525,7 @@ const truncate = (s: string | undefined, n: number) =>
       <div
         v-for="i in 7"
         :key="i"
-        class="rounded-lg border border-border bg-card p-3 flex items-start gap-3"
+        class="rounded-2xl border border-transparent bg-surface-container-low p-3 flex items-start gap-3 shadow-[var(--elevation-1)]"
       >
         <span class="cms-checkbox mt-1 shrink-0 pointer-events-none opacity-40" />
         <Skeleton class="h-5 w-16 rounded-full mt-0.5 shrink-0" />

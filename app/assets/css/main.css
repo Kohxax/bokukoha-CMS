@@ -73,8 +73,10 @@ html {
   --card-foreground: #f4f4f5;
   --popover: #27272a;
   --popover-foreground: #f4f4f5;
-  --primary: #f4f4f5;
-  --primary-foreground: #18181b;
+  --primary: #c7c5ff;
+  --primary-foreground: #29265f;
+  --primary-container: #45436f;
+  --primary-container-foreground: #e4e1ff;
   --secondary: #3f3f46;
   --secondary-foreground: #f4f4f5;
   --muted: #3f3f46;
@@ -83,27 +85,43 @@ html {
   --accent-foreground: #f4f4f5;
   --destructive: #ef4444;
   --destructive-foreground: #f4f4f5;
+  --info: #93c5fd;
+  --info-container: #1e3a5f;
+  --info-container-foreground: #dbeafe;
+  --warning: #fcd34d;
+  --warning-container: #493b12;
+  --warning-container-foreground: #fef3c7;
+  --error: #fca5a5;
+  --error-container: #4c1d1d;
+  --error-container-foreground: #fee2e2;
   --border: #3f3f46;
   --input: #3f3f46;
   --input-background: #27272a;
   --switch-background: #3f3f46;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #71717a;
+  --ring: #c7c5ff;
+  --surface-container-low: color-mix(in srgb, #27272a 58%, #18181b);
+  --surface-container: #27272a;
+  --surface-container-high: color-mix(in srgb, #27272a 64%, #3f3f46);
+  --surface-container-highest: #3f3f46;
+  --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+  --elevation-3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
-  --sidebar: #27272a;
+  --sidebar: var(--surface-container-low);
   --sidebar-foreground: #f4f4f5;
-  --sidebar-primary: #f4f4f5;
-  --sidebar-primary-foreground: #18181b;
-  --sidebar-accent: #3f3f46;
-  --sidebar-accent-foreground: #f4f4f5;
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--primary-container);
+  --sidebar-accent-foreground: var(--primary-container-foreground);
   --sidebar-border: #3f3f46;
-  --sidebar-ring: #71717a;
+  --sidebar-ring: var(--ring);
 }
 
 @layer base {
@@ -142,6 +160,42 @@ html {
 
   .m3-state-layer:active::after {
     opacity: 0.12;
+  }
+
+  .m3-interactive-card {
+    transition:
+      background-color 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms ease;
+  }
+
+  .m3-interactive-card:hover {
+    background-color: var(--surface-container-high);
+    box-shadow: var(--elevation-2);
+    transform: translateY(-1px);
+  }
+
+  .m3-interactive-card:focus-within {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  .m3-text-field {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+    border-radius: 0.75rem;
+    background: transparent;
+    padding: 0.625rem 0.75rem;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .m3-text-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+    outline: none;
   }
 
   .content-media-frame {
@@ -243,7 +297,7 @@ html {
 }
 
 .cms-checkbox {
-  @apply size-4 shrink-0 rounded-[4px] border border-input bg-background shadow-xs transition-shadow flex items-center justify-center;
+  @apply size-[18px] shrink-0 rounded-[2px] border-2 border-input bg-background shadow-none transition-colors flex items-center justify-center;
 }
 .cms-checkbox[data-checked="true"] {
   @apply bg-primary border-primary text-primary-foreground;
