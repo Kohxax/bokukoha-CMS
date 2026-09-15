@@ -7,12 +7,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { Plus, ImageIcon, BookText, X } from 'lucide-vue-next'
-import { Skeleton } from '~/components/ui/skeleton'
+import { Plus, BookText, X } from 'lucide-vue-next'
+import ArticleListCard from '~/components/cms/ArticleListCard.vue'
+import ArticleListCardSkeleton from '~/components/cms/ArticleListCardSkeleton.vue'
 
 definePageMeta({ middleware: 'auth' })
 
-const PAGE_SIZE = 7
+const PAGE_SIZE = 5
 type SortOrder = 'newest' | 'oldest' | 'updated'
 type DraftFilter = 'all' | 'draft' | 'published'
 
@@ -141,8 +142,9 @@ const displayPages = computed(() => {
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
+  <div class="px-4 py-6 md:p-6">
+    <div class="mx-auto w-full max-w-5xl">
+    <div class="mb-6 flex items-center justify-between">
       <div class="flex flex-row items-center gap-2">
         <BookText />
         <h1 class="text-xl font-semibold">Blog</h1>
@@ -159,7 +161,7 @@ const displayPages = computed(() => {
     </div>
 
     <div v-if="articles !== null">
-      <div class="flex gap-2 mb-3">
+      <div class="mb-4 flex flex-wrap gap-2">
         <Select :model-value="sortOrder" @update:model-value="setSort">
           <SelectTrigger class="w-36 h-8 text-xs">
             <SelectValue />
@@ -198,40 +200,16 @@ const displayPages = computed(() => {
         </Button>
       </div>
 
-      <div v-if="sortedArticles.length > 0" class="space-y-2">
-        <NuxtLink
+      <div v-if="sortedArticles.length > 0" class="space-y-3">
+        <ArticleListCard
           v-for="article in pagedArticles"
           :key="article.slug"
+          :article="article"
           :to="articleLink(article.slug)"
-          class="m3-interactive-card flex items-center gap-3 rounded-2xl border border-transparent bg-surface-container-low p-2 shadow-[var(--elevation-1)]"
-        >
-          <div class="min-w-0 flex-1">
-            <p class="truncate font-medium text-sm">{{ article.title }}</p>
-            <div class="flex items-center gap-2 mt-0.5">
-              <p class="text-xs text-muted-foreground">{{ article.date }} · {{ article.category }} · {{ article.body?.length.toLocaleString() }}文字</p>
-              <span
-                class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0"
-                :class="article.draft
-                  ? 'bg-amber-500/15 text-amber-400'
-                  : 'bg-emerald-500/15 text-emerald-400'"
-              >
-                {{ article.draft ? 'Draft' : 'Published' }}
-              </span>
-            </div>
-          </div>
-          <div class="shrink-0 w-24 h-16 rounded-md overflow-hidden bg-muted flex items-center justify-center">
-            <img
-              v-if="article.coverImage"
-              :src="article.coverImage"
-              :alt="article.title"
-              class="w-full h-full object-cover"
-            />
-            <ImageIcon v-else class="size-5 text-muted-foreground/40" />
-          </div>
-        </NuxtLink>
+        />
       </div>
 
-      <div v-else class="flex flex-col items-center justify-center py-24 text-muted-foreground">
+      <div v-else class="flex min-h-28 flex-col items-center justify-center rounded-2xl bg-surface-container-low px-4 py-20 text-muted-foreground">
         <p class="text-sm">条件に一致する記事がありません</p>
       </div>
 
@@ -250,18 +228,12 @@ const displayPages = computed(() => {
       </div>
     </div>
 
-    <div v-else class="space-y-2">
-      <div
+    <div v-else class="space-y-3">
+      <ArticleListCardSkeleton
         v-for="i in PAGE_SIZE"
         :key="i"
-        class="flex items-center gap-3 rounded-2xl border border-transparent bg-surface-container-low p-2 shadow-[var(--elevation-1)]"
-      >
-        <div class="min-w-0 flex-1 space-y-2">
-          <Skeleton class="h-4 w-2/3" />
-          <Skeleton class="h-3 w-1/3" />
-        </div>
-        <Skeleton class="shrink-0 w-24 h-16 rounded-md" />
-      </div>
+      />
+    </div>
     </div>
   </div>
 </template>

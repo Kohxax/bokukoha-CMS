@@ -165,17 +165,15 @@ html {
   .m3-interactive-card {
     transition:
       background-color 200ms ease,
-      box-shadow 200ms ease,
-      transform 200ms ease;
+      box-shadow 200ms ease;
   }
 
   .m3-interactive-card:hover {
     background-color: var(--surface-container-high);
-    box-shadow: var(--elevation-2);
-    transform: translateY(-1px);
+    box-shadow: var(--elevation-1);
   }
 
-  .m3-interactive-card:focus-within {
+  .m3-interactive-card:focus-visible {
     outline: 3px solid var(--ring);
     outline-offset: 2px;
   }
