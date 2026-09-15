@@ -8,6 +8,7 @@ import {
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
+import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { Check, MessageSquare, X, Trash2, CheckCircle, EyeOff, Eye, Send, Pin, PinOff } from 'lucide-vue-next'
+import { Check, MessageSquare, X, Trash2, CheckCircle, EyeOff, Eye, Send, Pin, PinOff, MoreHorizontal } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ middleware: 'auth' })
@@ -255,20 +256,6 @@ async function submitReply(comment: Comment) {
 
 // ── Display helpers ───────────────────────────────────────────────────────────
 
-const statusLabel: Record<string, string> = {
-  approved: '承認済み',
-  rejected_filter: 'ルール拒否',
-  rejected_claude: 'Claude拒否',
-  deleted: '非表示',
-}
-
-const statusClass: Record<string, string> = {
-  approved: 'bg-emerald-500/15 text-emerald-400',
-  rejected_filter: 'bg-red-500/15 text-red-400',
-  rejected_claude: 'bg-orange-500/15 text-orange-400',
-  deleted: 'bg-muted text-muted-foreground',
-}
-
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' })
 
@@ -326,7 +313,7 @@ const truncate = (s: string | undefined, n: number) =>
         <Button
           size="sm"
           variant="outline"
-          class="h-8 text-xs text-red-400 hover:text-red-300 border-red-400/30 hover:border-red-400/60"
+          class="h-8 border-error/30 text-xs text-error hover:border-error/60 hover:text-error"
           :disabled="processing"
           @click="openDelete(selectedComments)"
         >
@@ -348,10 +335,10 @@ const truncate = (s: string | undefined, n: number) =>
           <span class="text-xs text-muted-foreground">すべて選択</span>
         </label>
 
-        <div
+        <article
           v-for="comment in comments"
           :key="comment.commentId"
-          class="rounded-2xl border border-transparent bg-surface-container-low overflow-hidden shadow-[var(--elevation-1)] transition-[background-color,box-shadow]"
+          class="group overflow-hidden rounded-2xl bg-surface-container-low transition-[background-color,box-shadow] hover:bg-surface-container focus-within:bg-surface-container focus-within:ring-[3px] focus-within:ring-ring"
           :class="selected.has(comment.commentId) ? 'bg-primary-container/40 ring-1 ring-primary/40' : ''"
         >
           <div class="flex items-start gap-3 p-3">
@@ -364,15 +351,10 @@ const truncate = (s: string | undefined, n: number) =>
             </label>
 
             <!-- Pinned badge -->
-            <Pin v-if="comment.pinned" class="mt-1 size-3.5 shrink-0 text-amber-400" />
+            <Pin v-if="comment.pinned" class="mt-1 size-3.5 shrink-0 text-warning" aria-label="ピン止め済み" />
 
             <!-- Status badge -->
-            <span
-              class="mt-0.5 shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
-              :class="statusClass[comment.status] ?? 'bg-muted text-muted-foreground'"
-            >
-              {{ statusLabel[comment.status] ?? comment.status }}
-            </span>
+            <CommentStatusChip :status="comment.status" class="mt-0.5" />
 
             <!-- Content -->
             <div class="min-w-0 flex-1">
@@ -387,7 +369,7 @@ const truncate = (s: string | undefined, n: number) =>
                 </button>
                 <span class="text-xs text-muted-foreground ml-auto">{{ formatDate(comment.createdAt) }}</span>
               </div>
-              <p class="text-sm mt-1 text-muted-foreground leading-relaxed">
+              <p class="mt-1 text-sm leading-relaxed text-foreground">
                 {{ expandedId === comment.commentId ? comment.content : truncate(comment.content, 120) }}
               </p>
               <button
@@ -403,50 +385,34 @@ const truncate = (s: string | undefined, n: number) =>
                 <span
                   v-for="r in comment.filterReasons"
                   :key="r"
-                  class="text-[11px] bg-red-500/10 text-red-400 rounded px-1.5 py-0.5"
+                  class="rounded-full bg-error-container px-1.5 py-0.5 text-[11px] text-error-container-foreground"
                 >{{ r }}</span>
                 <span class="text-[11px] text-muted-foreground">score: {{ comment.filterScore }}</span>
               </div>
-              <p v-if="comment.moderationReason" class="text-[11px] text-orange-400 mt-1">
+              <p v-if="comment.moderationReason" class="mt-1 text-[11px] text-warning">
                 Claude: {{ comment.moderationReason }}
               </p>
             </div>
 
             <!-- Per-row actions -->
-            <div class="shrink-0 flex items-center gap-1">
+            <div class="flex shrink-0 items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
               <!-- Approve (for rejected) -->
               <Button
                 v-if="comment.status === 'rejected_filter' || comment.status === 'rejected_claude'"
                 size="sm"
                 variant="ghost"
-                class="h-7 px-2 text-xs text-emerald-400 hover:text-emerald-300"
+                class="h-8 px-3 text-xs text-primary"
                 :disabled="processing"
                 @click="approve(comment)"
               >
                 <CheckCircle class="size-3 mr-1" />
                 承認
               </Button>
-              <!-- Pin / Unpin (approved top-level only) -->
               <Button
                 v-if="comment.status === 'approved' && !comment.parentId"
                 size="sm"
                 variant="ghost"
-                class="h-7 px-2 text-xs"
-                :class="comment.pinned ? 'text-amber-400 hover:text-amber-300' : 'text-muted-foreground hover:text-foreground'"
-                :disabled="processing"
-                :title="comment.pinned ? 'ピン止めを解除' : 'ピン止め'"
-                @click="togglePin(comment)"
-              >
-                <PinOff v-if="comment.pinned" class="size-3" />
-                <Pin v-else class="size-3" />
-              </Button>
-
-              <!-- Reply (for approved top-level only) -->
-              <Button
-                v-if="comment.status === 'approved' && !comment.parentId"
-                size="sm"
-                variant="ghost"
-                class="h-7 px-2 text-xs"
+                class="h-8 px-3 text-xs"
                 :class="replyingTo === comment.commentId ? 'text-primary' : 'text-muted-foreground hover:text-foreground'"
                 :disabled="processing || replying"
                 @click="openReply(comment)"
@@ -454,41 +420,44 @@ const truncate = (s: string | undefined, n: number) =>
               >
                 <MessageSquare class="size-3" />
               </Button>
-              <!-- Hide (for approved only) -->
-              <Button
-                v-if="comment.status === 'approved'"
-                size="sm"
-                variant="ghost"
-                class="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                :disabled="processing"
-                @click="openHide([comment])"
-                title="非表示にする"
-              >
-                <EyeOff class="size-3" />
-              </Button>
               <!-- Restore (for hidden only) -->
               <Button
                 v-if="comment.status === 'deleted'"
                 size="sm"
                 variant="ghost"
-                class="h-7 px-2 text-xs text-muted-foreground hover:text-emerald-400"
+                class="h-8 px-3 text-xs text-primary"
                 :disabled="processing"
                 @click="restore(comment)"
                 title="再表示する"
               >
                 <Eye class="size-3" />
               </Button>
-              <!-- DB Delete -->
-              <Button
-                size="sm"
-                variant="ghost"
-                class="h-7 px-2 text-xs text-muted-foreground hover:text-red-400"
-                :disabled="processing"
-                @click="openDelete([comment])"
-                title="DBから削除"
-              >
-                <Trash2 class="size-3" />
-              </Button>
+              <Popover>
+                <PopoverTrigger as-child>
+                  <Button size="icon-sm" variant="ghost" class="text-muted-foreground" :disabled="processing" aria-label="その他の操作" title="その他の操作">
+                    <MoreHorizontal class="size-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" class="w-48 rounded-xl p-1">
+                  <PopoverClose v-if="comment.status === 'approved' && !comment.parentId" as-child>
+                    <Button variant="ghost" class="w-full justify-start px-3 text-sm" @click="togglePin(comment)">
+                      <PinOff v-if="comment.pinned" class="size-4" />
+                      <Pin v-else class="size-4" />
+                      {{ comment.pinned ? 'ピン止めを解除' : 'ピン止め' }}
+                    </Button>
+                  </PopoverClose>
+                  <PopoverClose v-if="comment.status === 'approved'" as-child>
+                    <Button variant="ghost" class="w-full justify-start px-3 text-sm" @click="openHide([comment])">
+                      <EyeOff class="size-4" />非表示にする
+                    </Button>
+                  </PopoverClose>
+                  <PopoverClose as-child>
+                    <Button variant="ghost" class="w-full justify-start px-3 text-sm text-error hover:text-error" @click="openDelete([comment])">
+                      <Trash2 class="size-4" />DBから削除
+                    </Button>
+                  </PopoverClose>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
@@ -512,7 +481,7 @@ const truncate = (s: string | undefined, n: number) =>
               </div>
             </div>
           </div>
-        </div>
+        </article>
       </div>
 
       <div v-else class="flex flex-col items-center justify-center py-24 text-muted-foreground">
@@ -525,7 +494,7 @@ const truncate = (s: string | undefined, n: number) =>
       <div
         v-for="i in 7"
         :key="i"
-        class="rounded-2xl border border-transparent bg-surface-container-low p-3 flex items-start gap-3 shadow-[var(--elevation-1)]"
+        class="flex items-start gap-3 rounded-2xl bg-surface-container-low p-3"
       >
         <span class="cms-checkbox mt-1 shrink-0 pointer-events-none opacity-40" />
         <Skeleton class="h-5 w-16 rounded-full mt-0.5 shrink-0" />

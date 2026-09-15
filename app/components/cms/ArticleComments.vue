@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Button } from '~/components/ui/button'
+import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { Check, CheckCircle, ChevronDown, ChevronRight, Eye, EyeOff, MessageSquare, Pin, PinOff, Send, Trash2 } from 'lucide-vue-next'
+import { CheckCircle, ChevronDown, ChevronRight, Eye, EyeOff, MessageSquare, MoreHorizontal, Pin, PinOff, Send, Trash2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 interface Comment {
@@ -196,20 +197,6 @@ async function submitPost() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const statusLabel: Record<string, string> = {
-  approved: '承認済み',
-  rejected_filter: 'ルール拒否',
-  rejected_claude: 'Claude拒否',
-  deleted: '非表示',
-}
-
-const statusClass: Record<string, string> = {
-  approved: 'bg-emerald-500/15 text-emerald-400',
-  rejected_filter: 'bg-red-500/15 text-red-400',
-  rejected_claude: 'bg-orange-500/15 text-orange-400',
-  deleted: 'bg-muted text-muted-foreground',
-}
-
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
@@ -228,7 +215,7 @@ const total = computed(() => countAll(comments.value))
 <template>
   <div class="flex flex-col h-full overflow-hidden">
     <!-- Header -->
-    <div class="flex items-center justify-between px-4 py-2 border-b border-border shrink-0">
+    <div class="flex shrink-0 items-center justify-between bg-surface-container px-4 py-2">
       <span class="text-xs text-muted-foreground">
         {{ loading ? '読込中...' : `${total}件` }}
       </span>
@@ -236,7 +223,7 @@ const total = computed(() => countAll(comments.value))
     </div>
 
     <!-- Admin post form -->
-    <div class="px-4 py-3 border-b border-border shrink-0">
+    <div class="shrink-0 bg-surface-container px-4 py-3">
       <div>
         <textarea
           v-model="postContent"
@@ -267,10 +254,10 @@ const total = computed(() => countAll(comments.value))
         コメントがありません
       </div>
 
-      <div v-else class="divide-y divide-border/20">
+      <div v-else class="space-y-2 p-2">
         <template v-for="comment in comments" :key="comment.commentId">
           <!-- Root comment -->
-          <div class="px-4 py-3">
+          <article class="group rounded-2xl bg-surface-container p-3 transition-colors hover:bg-surface-container-high focus-within:bg-surface-container-high focus-within:ring-[3px] focus-within:ring-ring">
             <div class="flex items-start gap-2">
               <!-- Expand toggle -->
               <button class="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground" @click="toggleExpand(comment.commentId)">
@@ -282,87 +269,82 @@ const total = computed(() => countAll(comments.value))
                 <div class="flex items-center gap-1.5 flex-wrap mb-1">
                   <span
                     v-if="comment.isAdmin"
-                    class="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-primary/15 text-primary"
+                    class="inline-flex items-center gap-0.5 rounded-full bg-primary-container px-1.5 py-0.5 text-[10px] font-medium text-primary-container-foreground"
                   >管理者</span>
                   <span class="text-xs font-medium">{{ comment.authorName ?? '名無しさん' }}</span>
-                  <span
-                    class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-                    :class="statusClass[comment.status] ?? 'bg-muted text-muted-foreground'"
-                  >{{ statusLabel[comment.status] ?? comment.status }}</span>
-                  <Pin v-if="comment.pinned" class="size-3 text-amber-400 shrink-0" />
+                  <CommentStatusChip :status="comment.status" class="h-4.5 px-1.5 text-[10px]" />
+                  <Pin v-if="comment.pinned" class="size-3 shrink-0 text-warning" aria-label="ピン止め済み" />
                   <span class="text-[11px] text-muted-foreground ml-auto">{{ formatDate(comment.createdAt) }}</span>
                 </div>
 
                 <!-- Content preview -->
-                <p class="text-xs text-muted-foreground leading-relaxed line-clamp-2">{{ comment.content }}</p>
+                <p class="line-clamp-2 text-xs leading-relaxed text-foreground">{{ comment.content }}</p>
 
                 <!-- Expanded content + actions -->
                 <template v-if="expandedIds.has(comment.commentId)">
                   <p class="text-xs leading-relaxed mt-1 whitespace-pre-wrap">{{ comment.content }}</p>
 
                   <div v-if="comment.filterReasons?.length" class="flex flex-wrap gap-1 mt-1">
-                    <span v-for="r in comment.filterReasons" :key="r" class="text-[10px] bg-red-500/10 text-red-400 rounded px-1 py-0.5">{{ r }}</span>
+                    <span v-for="r in comment.filterReasons" :key="r" class="rounded-full bg-error-container px-1.5 py-0.5 text-[10px] text-error-container-foreground">{{ r }}</span>
                   </div>
-                  <p v-if="comment.moderationReason" class="text-[10px] text-orange-400 mt-0.5">Claude: {{ comment.moderationReason }}</p>
+                  <p v-if="comment.moderationReason" class="mt-0.5 text-[10px] text-warning">Claude: {{ comment.moderationReason }}</p>
 
                   <!-- Actions -->
-                  <div class="flex items-center gap-1 mt-2 flex-wrap">
+                  <div class="mt-2 flex flex-wrap items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                     <Button
-                      v-if="comment.status !== 'approved'"
+                      v-if="comment.status === 'rejected_filter' || comment.status === 'rejected_claude'"
                       size="sm" variant="ghost"
-                      class="h-6 px-1.5 text-[11px] text-emerald-400 hover:text-emerald-300"
+                      class="h-7 px-2 text-[11px] text-primary"
                       :disabled="processing" @click="approve(comment)"
                     >
                       <CheckCircle class="size-3 mr-0.5" />承認
                     </Button>
                     <Button
-                      v-if="comment.status === 'approved'"
-                      size="sm" variant="ghost"
-                      class="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-foreground"
-                      :disabled="processing" @click="openHide(comment)"
-                    >
-                      <EyeOff class="size-3 mr-0.5" />非表示
-                    </Button>
-                    <Button
                       v-if="comment.status === 'deleted'"
                       size="sm" variant="ghost"
-                      class="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-emerald-400"
+                      class="h-7 px-2 text-[11px] text-primary"
                       :disabled="processing" @click="restore(comment)"
                     >
                       <Eye class="size-3 mr-0.5" />再表示
                     </Button>
                     <Button
-                      size="sm" variant="ghost"
-                      class="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-red-400"
-                      :disabled="processing" @click="openDelete(comment)"
-                    >
-                      <Trash2 class="size-3 mr-0.5" />削除
-                    </Button>
-                    <Button
-                      v-if="comment.status === 'approved'"
-                      size="sm" variant="ghost"
-                      class="h-6 px-1.5 text-[11px]"
-                      :class="comment.pinned ? 'text-amber-400 hover:text-amber-300' : 'text-muted-foreground hover:text-foreground'"
-                      :disabled="processing"
-                      :title="comment.pinned ? 'ピン止めを解除' : 'ピン止め'"
-                      @click="togglePin(comment)"
-                    >
-                      <PinOff v-if="comment.pinned" class="size-3 mr-0.5" />
-                      <Pin v-else class="size-3 mr-0.5" />
-                      {{ comment.pinned ? '解除' : 'ピン' }}
-                    </Button>
-                    <Button
                       v-if="!comment.parentId && comment.status === 'approved'"
                       size="sm" variant="ghost"
-                      class="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-foreground"
+                      class="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
                       @click="openReply(comment.commentId)"
                     >
                       <MessageSquare class="size-3 mr-0.5" />返信
                     </Button>
+                    <Popover>
+                      <PopoverTrigger as-child>
+                        <Button size="icon-sm" variant="ghost" class="size-7 text-muted-foreground" :disabled="processing" aria-label="その他の操作" title="その他の操作">
+                          <MoreHorizontal class="size-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" class="w-44 rounded-xl p-1">
+                        <PopoverClose v-if="comment.status === 'approved'" as-child>
+                          <Button variant="ghost" class="w-full justify-start px-3 text-xs" @click="openHide(comment)">
+                            <EyeOff class="size-4" />非表示
+                          </Button>
+                        </PopoverClose>
+                        <PopoverClose v-if="comment.status === 'approved'" as-child>
+                          <Button variant="ghost" class="w-full justify-start px-3 text-xs" @click="togglePin(comment)">
+                            <PinOff v-if="comment.pinned" class="size-4" />
+                            <Pin v-else class="size-4" />
+                            {{ comment.pinned ? 'ピン止めを解除' : 'ピン止め' }}
+                          </Button>
+                        </PopoverClose>
+                        <PopoverClose as-child>
+                          <Button variant="ghost" class="w-full justify-start px-3 text-xs text-error hover:text-error" @click="openDelete(comment)">
+                            <Trash2 class="size-4" />DBから削除
+                          </Button>
+                        </PopoverClose>
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <!-- Inline reply form -->
-                  <div v-if="replyingTo === comment.commentId" class="mt-2 pl-2 border-l-2 border-primary/30">
+                  <div v-if="replyingTo === comment.commentId" class="mt-2 rounded-xl bg-primary-container/25 p-2">
                     <textarea
                       v-model="replyContent"
                       rows="2"
@@ -380,48 +362,55 @@ const total = computed(() => countAll(comments.value))
                   </div>
 
                   <!-- Replies -->
-                  <div v-if="(comment.replies?.length ?? 0) > 0" class="mt-2 ml-2 pl-3 border-l-2 border-muted space-y-2">
-                    <div v-for="reply in comment.replies" :key="reply.commentId" class="pt-2">
+                  <div v-if="(comment.replies?.length ?? 0) > 0" class="mt-3 ml-3 space-y-2">
+                    <div v-for="reply in comment.replies" :key="reply.commentId" class="group/reply rounded-xl bg-surface-container-high p-2.5">
                       <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
                         <span
                           v-if="reply.isAdmin"
-                          class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-primary/15 text-primary"
+                          class="inline-flex items-center rounded-full bg-primary-container px-1.5 py-0.5 text-[10px] font-medium text-primary-container-foreground"
                         >管理者</span>
                         <span class="text-xs font-medium">{{ reply.authorName ?? '名無しさん' }}</span>
-                        <span
-                          class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-                          :class="statusClass[reply.status] ?? 'bg-muted text-muted-foreground'"
-                        >{{ statusLabel[reply.status] ?? reply.status }}</span>
+                        <CommentStatusChip :status="reply.status" class="h-4.5 px-1.5 text-[10px]" />
                         <span class="text-[11px] text-muted-foreground ml-auto">{{ formatDate(reply.createdAt) }}</span>
                       </div>
                       <p class="text-xs leading-relaxed whitespace-pre-wrap">{{ reply.content }}</p>
-                      <div class="flex items-center gap-1 mt-1">
+                      <div class="mt-1 flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover/reply:opacity-100 sm:group-focus-within/reply:opacity-100">
                         <Button
-                          v-if="reply.status !== 'approved'"
-                          size="sm" variant="ghost" class="h-5 px-1 text-[10px] text-emerald-400 hover:text-emerald-300"
+                          v-if="reply.status === 'rejected_filter' || reply.status === 'rejected_claude'"
+                          size="sm" variant="ghost" class="h-7 px-2 text-[10px] text-primary"
                           :disabled="processing" @click="approve(reply)"
                         ><CheckCircle class="size-2.5 mr-0.5" />承認</Button>
                         <Button
-                          v-if="reply.status === 'approved'"
-                          size="sm" variant="ghost" class="h-5 px-1 text-[10px] text-muted-foreground hover:text-foreground"
-                          :disabled="processing" @click="openHide(reply)"
-                        ><EyeOff class="size-2.5 mr-0.5" />非表示</Button>
-                        <Button
                           v-if="reply.status === 'deleted'"
-                          size="sm" variant="ghost" class="h-5 px-1 text-[10px] text-muted-foreground hover:text-emerald-400"
+                          size="sm" variant="ghost" class="h-7 px-2 text-[10px] text-primary"
                           :disabled="processing" @click="restore(reply)"
                         ><Eye class="size-2.5 mr-0.5" />再表示</Button>
-                        <Button
-                          size="sm" variant="ghost" class="h-5 px-1 text-[10px] text-muted-foreground hover:text-red-400"
-                          :disabled="processing" @click="openDelete(reply)"
-                        ><Trash2 class="size-2.5 mr-0.5" />削除</Button>
+                        <Popover>
+                          <PopoverTrigger as-child>
+                            <Button size="icon-sm" variant="ghost" class="size-7 text-muted-foreground" :disabled="processing" aria-label="その他の操作" title="その他の操作">
+                              <MoreHorizontal class="size-4" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent align="end" class="w-44 rounded-xl p-1">
+                            <PopoverClose v-if="reply.status === 'approved'" as-child>
+                              <Button variant="ghost" class="w-full justify-start px-3 text-xs" @click="openHide(reply)">
+                                <EyeOff class="size-4" />非表示
+                              </Button>
+                            </PopoverClose>
+                            <PopoverClose as-child>
+                              <Button variant="ghost" class="w-full justify-start px-3 text-xs text-error hover:text-error" @click="openDelete(reply)">
+                                <Trash2 class="size-4" />DBから削除
+                              </Button>
+                            </PopoverClose>
+                          </PopoverContent>
+                        </Popover>
                       </div>
                     </div>
                   </div>
                 </template>
               </div>
             </div>
-          </div>
+          </article>
         </template>
       </div>
     </div>
