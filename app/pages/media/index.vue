@@ -265,11 +265,11 @@ async function upload() {
     </div>
 
     <!-- アップロードフォーム -->
-    <div class="mb-6 rounded-2xl border border-transparent bg-surface-container-low p-4 space-y-3 shadow-[var(--elevation-1)]">
+    <div class="mb-6 space-y-3 rounded-2xl bg-surface-container p-4">
       <p class="text-sm font-medium flex items-center gap-2"><Upload class="size-4" /> アップロード</p>
       <div class="flex flex-wrap gap-2">
         <Select v-model="uploadCollection">
-          <SelectTrigger class="h-8 text-xs w-28">
+          <SelectTrigger class="h-10 w-28 text-xs">
             <SelectValue placeholder="collection" />
           </SelectTrigger>
           <SelectContent>
@@ -280,7 +280,7 @@ async function upload() {
         <Input
           v-model="uploadSlug"
           placeholder="slug"
-          class="h-9 text-xs w-44"
+          class="h-10 w-44 text-xs"
         />
         <input
           ref="fileInput"
@@ -292,14 +292,14 @@ async function upload() {
         <Button
           variant="outline"
           size="default"
-          class="h-8 text-xs"
+          class="max-w-full text-xs"
           @click="fileInput?.click()"
         >
-          {{ uploadFile ? uploadFile.name : 'ファイルを選択' }}
+          <span class="max-w-52 truncate">{{ uploadFile ? uploadFile.name : 'ファイルを選択' }}</span>
         </Button>
         <Button
           size="default"
-          class="h-8 text-xs"
+          class="text-xs"
           :disabled="uploading || !uploadFile || !uploadCollection || !uploadSlug"
           @click="upload"
         >
@@ -401,44 +401,54 @@ async function upload() {
       <div
         v-for="item in filteredItems"
         :key="item.key"
-        class="rounded-2xl border border-transparent bg-surface-container-low overflow-hidden shadow-[var(--elevation-1)]"
+        class="group overflow-hidden rounded-2xl bg-surface-container-low shadow-none transition-[background-color,box-shadow] duration-200 hover:bg-surface-container-high hover:shadow-[var(--elevation-1)] focus-within:ring-[3px] focus-within:ring-ring"
       >
-        <div class="relative aspect-square bg-muted cursor-pointer" @click="openViewer(item.url)">
+        <button
+          type="button"
+          class="relative block aspect-square w-full cursor-pointer overflow-hidden bg-muted text-left outline-none"
+          :aria-label="`${fileName(item.key)}を表示`"
+          @click="openViewer(item.url)"
+        >
           <img
             :src="item.url"
             :alt="fileName(item.key)"
-            class="w-full h-full object-cover"
+            class="h-full w-full object-cover"
             loading="lazy"
             @load="onImgLoad(item.key)"
             @error="onImgError(item.key)"
           />
           <Skeleton v-if="!loadedKeys[item.key]" class="absolute inset-0 rounded-none" />
-        </div>
-        <div class="p-2 space-y-1">
-          <p class="text-[11px] text-foreground truncate" :title="item.key">
+        </button>
+        <div class="space-y-2 p-3">
+          <p class="truncate text-sm font-medium leading-5" :title="item.key">
             {{ fileName(item.key) }}
           </p>
-          <p class="text-[10px] text-muted-foreground truncate" :title="item.articleKey">
-            {{ titleMap.get(item.articleKey) ?? item.articleSlug }}
-          </p>
-          <p class="text-[10px] text-muted-foreground">{{ formatSize(item.size) }}</p>
-          <div class="flex gap-1">
+          <div class="space-y-0.5 text-xs text-muted-foreground">
+            <p class="truncate" :title="item.articleKey">
+              {{ titleMap.get(item.articleKey) || item.articleSlug || '記事未指定' }}
+            </p>
+            <p class="tabular-nums">{{ formatSize(item.size) }}</p>
+          </div>
+          <div class="flex items-center gap-1 pt-1">
             <Button
               variant="ghost"
               size="icon"
-              class="h-6 w-6"
-              :title="item.url"
+              class="size-10"
+              title="URLをコピー"
+              :aria-label="`${fileName(item.key)}のURLをコピー`"
               @click="copyUrl(item.url)"
             >
-              <Copy class="size-3" />
+              <Copy class="size-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              class="h-6 w-6 text-destructive hover:text-destructive"
+              class="size-10 text-destructive hover:text-destructive"
+              title="画像を削除"
+              :aria-label="`${fileName(item.key)}を削除`"
               @click="deleteTarget = item"
             >
-              <Trash2 class="size-3" />
+              <Trash2 class="size-4" />
             </Button>
           </div>
         </div>
@@ -450,11 +460,15 @@ async function upload() {
       v-else
       class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
     >
-      <div v-for="i in 12" :key="i" class="rounded-2xl border border-transparent bg-surface-container-low overflow-hidden shadow-[var(--elevation-1)]">
+      <div v-for="i in 12" :key="i" class="overflow-hidden rounded-2xl bg-surface-container-low shadow-none">
         <Skeleton class="aspect-square w-full" />
-        <div class="p-2 space-y-2">
+        <div class="space-y-2 p-3">
           <Skeleton class="h-3 w-3/4" />
           <Skeleton class="h-3 w-1/2" />
+          <div class="flex gap-2 pt-1">
+            <Skeleton class="size-10 rounded-full" />
+            <Skeleton class="size-10 rounded-full" />
+          </div>
         </div>
       </div>
     </div>
