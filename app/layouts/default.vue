@@ -28,6 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
+import { useWindowScroll } from '@vueuse/core'
 
 const route = useRoute()
 const { clear: clearSession } = useUserSession()
@@ -40,6 +41,13 @@ async function logout() {
 
 const deploying = ref(false)
 const showDeployDialog = ref(false)
+const contentScrollTop = ref(0)
+const { y: windowScrollY } = useWindowScroll()
+const isContentScrolled = computed(() => windowScrollY.value > 0 || contentScrollTop.value > 0)
+
+function handleContentScroll(event: Event) {
+  contentScrollTop.value = (event.currentTarget as HTMLElement).scrollTop
+}
 
 async function confirmDeploy() {
   showDeployDialog.value = false
@@ -167,7 +175,14 @@ const commentsItem = { title: 'Comments', url: '/comments', icon: MessageSquare,
     </Sidebar>
 
     <SidebarInset>
-      <header class="flex h-12 items-center gap-2 border-b border-border px-4">
+      <header
+        :class="[
+          'sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 px-4 transition-[background-color,box-shadow] duration-200 md:px-6',
+          isContentScrolled
+            ? 'bg-surface-container-high shadow-[var(--elevation-1)]'
+            : 'bg-surface-container shadow-none',
+        ]"
+      >
         <SidebarTrigger class="-ml-1" />
         <div class="flex-1" />
         <button
@@ -194,7 +209,10 @@ const commentsItem = { title: 'Comments', url: '/comments', icon: MessageSquare,
           <span>{{ deploying ? '...' : 'Deploy' }}</span>
         </Button>
       </header>
-      <main class="relative flex-1 overflow-auto">
+      <main
+        class="relative flex-1 overflow-auto bg-background"
+        @scroll.passive="handleContentScroll"
+      >
         <slot />
       </main>
     </SidebarInset>

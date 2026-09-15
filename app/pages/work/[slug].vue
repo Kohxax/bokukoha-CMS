@@ -122,7 +122,7 @@ async function deleteArticle() {
 </script>
 
 <template>
-  <div class="flex flex-col h-[calc(100vh-3rem)]">
+  <div class="flex flex-col h-[calc(100vh-3.5rem)]">
     <div class="flex items-center gap-3 border-b border-border px-4 py-2 shrink-0">
       <Button variant="ghost" size="sm" as-child>
         <NuxtLink :to="backLink"><AlignLeft />一覧</NuxtLink>
