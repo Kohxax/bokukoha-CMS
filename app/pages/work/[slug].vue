@@ -123,49 +123,41 @@ async function deleteArticle() {
 
 <template>
   <div class="flex flex-col h-[calc(100vh-3.5rem)]">
-    <div class="flex items-center gap-3 border-b border-border px-4 py-2 shrink-0">
+    <div class="flex shrink-0 items-center gap-3 bg-surface-container-low px-4 py-2">
       <Button variant="ghost" size="sm" as-child>
         <NuxtLink :to="backLink"><AlignLeft />一覧</NuxtLink>
       </Button>
       <span class="text-sm text-muted-foreground truncate">{{ slug }}</span>
       <span v-if="isDirty" class="text-amber-400 text-xs leading-none" title="未保存の変更があります">●</span>
       <span class="text-xs text-muted-foreground tabular-nums flex-1">{{ charCount }}文字</span>
-      <Button variant="destructive" size="sm" @click="showDeleteDialog = true">削除</Button>
-      <Button size="sm" :disabled="saving" :class="isDirty && !saving ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''" @click="save">
+      <Button variant="text" size="sm" class="text-destructive" @click="showDeleteDialog = true">削除</Button>
+      <Button size="sm" :disabled="saving" @click="save">
         {{ saving ? '保存中...' : '保存' }}
       </Button>
     </div>
 
-    <div v-if="loaded" class="flex flex-1 overflow-hidden">
+    <div v-if="loaded" class="flex flex-1 gap-3 overflow-hidden bg-background p-3">
       <!-- sidebar: frontmatter / comments (desktop only) -->
-      <aside class="hidden md:flex flex-col w-72 shrink-0 border-r border-border overflow-hidden">
-        <div class="flex border-b border-border shrink-0">
-          <button
-            class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors"
-            :class="asideTab === 'settings' ? 'text-foreground border-b-2 border-primary -mb-px' : 'text-muted-foreground hover:text-foreground'"
-            @click="asideTab = 'settings'"
-          >設定</button>
-          <button
-            class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors"
-            :class="asideTab === 'comments' ? 'text-foreground border-b-2 border-primary -mb-px' : 'text-muted-foreground hover:text-foreground'"
-            @click="asideTab = 'comments'"
-          >
+      <Tabs v-model="asideTab" class="hidden w-72 shrink-0 flex-col overflow-hidden rounded-2xl bg-surface-container-low md:flex">
+        <TabsList class="mx-3 mt-3 w-auto shrink-0">
+          <TabsTrigger value="settings">設定</TabsTrigger>
+          <TabsTrigger value="comments">
             <MessageSquare class="size-3.5" />コメント
-          </button>
-        </div>
-        <div v-show="asideTab === 'settings'" class="flex-1 overflow-y-auto p-4">
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="settings" class="mt-0 flex-1 overflow-y-auto p-4">
           <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
-        </div>
-        <div v-show="asideTab === 'comments'" class="flex-1 overflow-hidden">
+        </TabsContent>
+        <TabsContent value="comments" class="mt-0 flex-1 overflow-hidden">
           <ArticleComments :article-id="articleId" />
-        </div>
-      </aside>
+        </TabsContent>
+      </Tabs>
 
-      <div class="hidden md:flex flex-1 overflow-hidden">
-        <div class="flex-1 overflow-hidden p-3 min-w-0">
+      <div class="hidden min-w-0 flex-1 gap-3 overflow-hidden md:flex">
+        <div class="min-w-0 flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
           <MarkdownEditor v-model="body" collection="work" :slug="slug" />
         </div>
-        <div class="flex-1 overflow-hidden p-3">
+        <div class="flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
           <MarkdownPreview :content="body" :frontmatter="frontmatter" collection="work" />
         </div>
       </div>
@@ -173,22 +165,22 @@ async function deleteArticle() {
       <!-- mobile: 4 tabs -->
       <div class="flex md:hidden flex-1 overflow-hidden">
         <Tabs default-value="editor" class="flex flex-col flex-1 overflow-hidden">
-          <TabsList class="mx-3 mt-2 shrink-0">
+          <TabsList class="w-full shrink-0">
             <TabsTrigger value="frontmatter" class="flex-1">設定</TabsTrigger>
             <TabsTrigger value="editor" class="flex-1">エディタ</TabsTrigger>
             <TabsTrigger value="preview" class="flex-1">プレビュー</TabsTrigger>
             <TabsTrigger value="comments" class="flex-1">コメント</TabsTrigger>
           </TabsList>
-          <TabsContent value="frontmatter" class="flex-1 overflow-y-auto p-3 mt-0">
+          <TabsContent value="frontmatter" class="mt-3 flex-1 overflow-y-auto rounded-2xl bg-surface-container-low p-4">
             <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
           </TabsContent>
-          <TabsContent value="editor" class="flex-1 overflow-hidden p-3 mt-0 min-w-0">
+          <TabsContent value="editor" class="mt-3 min-w-0 flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
             <MarkdownEditor v-model="body" collection="work" :slug="slug" />
           </TabsContent>
-          <TabsContent value="preview" class="flex-1 overflow-hidden p-3 mt-0">
+          <TabsContent value="preview" class="mt-3 flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
             <MarkdownPreview :content="body" :frontmatter="frontmatter" collection="work" />
           </TabsContent>
-          <TabsContent value="comments" class="flex-1 overflow-hidden mt-0">
+          <TabsContent value="comments" class="mt-3 flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
             <ArticleComments :article-id="articleId" />
           </TabsContent>
         </Tabs>

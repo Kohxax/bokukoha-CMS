@@ -85,7 +85,7 @@ async function save() {
 
 <template>
   <div class="flex flex-col h-[calc(100vh-3.5rem)]">
-    <div class="flex items-center gap-3 border-b border-border px-4 py-2 shrink-0">
+    <div class="flex shrink-0 items-center gap-3 bg-surface-container-low px-4 py-2">
       <Button variant="ghost" size="sm" as-child>
         <NuxtLink to="/work"><AlignLeft />一覧</NuxtLink>
       </Button>
@@ -95,9 +95,9 @@ async function save() {
       </Button>
     </div>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 gap-3 overflow-hidden bg-background p-3">
       <!-- sidebar: frontmatter (desktop only) -->
-      <aside class="hidden md:flex flex-col w-72 shrink-0 border-r border-border overflow-y-auto p-4 space-y-4">
+      <aside class="hidden w-72 shrink-0 flex-col space-y-4 overflow-y-auto rounded-2xl bg-surface-container-low p-4 md:flex">
         <div class="space-y-1.5">
           <label class="text-sm font-medium">slug <span class="text-destructive">*</span></label>
           <input
@@ -109,11 +109,11 @@ async function save() {
         <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
       </aside>
 
-      <div class="hidden md:flex flex-1 overflow-hidden">
-        <div class="flex-1 overflow-hidden p-3">
+      <div class="hidden min-w-0 flex-1 gap-3 overflow-hidden md:flex">
+        <div class="min-w-0 flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
           <MarkdownEditor v-model="body" collection="work" :slug="slug" />
         </div>
-        <div class="flex-1 overflow-hidden p-3">
+        <div class="flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
           <MarkdownPreview :content="body" :frontmatter="frontmatter" collection="work" />
         </div>
       </div>
@@ -121,12 +121,12 @@ async function save() {
       <!-- mobile: 3 tabs -->
       <div class="flex md:hidden flex-1 overflow-hidden">
         <Tabs default-value="frontmatter" class="flex flex-col flex-1 overflow-hidden">
-          <TabsList class="mx-3 mt-2 shrink-0">
+          <TabsList class="w-full shrink-0">
             <TabsTrigger value="frontmatter" class="flex-1">設定</TabsTrigger>
             <TabsTrigger value="editor" class="flex-1">エディタ</TabsTrigger>
             <TabsTrigger value="preview" class="flex-1">プレビュー</TabsTrigger>
           </TabsList>
-          <TabsContent value="frontmatter" class="flex-1 overflow-y-auto p-3 mt-0 space-y-4">
+          <TabsContent value="frontmatter" class="mt-3 flex-1 space-y-4 overflow-y-auto rounded-2xl bg-surface-container-low p-4">
             <div class="space-y-1.5">
               <label class="text-sm font-medium">slug <span class="text-destructive">*</span></label>
               <input
@@ -137,10 +137,10 @@ async function save() {
             </div>
             <FrontmatterForm v-model="frontmatter" collection="work" :slug="slug" :category-suggestions="categorySuggestions" />
           </TabsContent>
-          <TabsContent value="editor" class="flex-1 overflow-hidden p-3 mt-0">
+          <TabsContent value="editor" class="mt-3 flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
             <MarkdownEditor v-model="body" collection="work" :slug="slug" />
           </TabsContent>
-          <TabsContent value="preview" class="flex-1 overflow-hidden p-3 mt-0">
+          <TabsContent value="preview" class="mt-3 flex-1 overflow-hidden rounded-2xl bg-surface-container-low">
             <MarkdownPreview :content="body" :frontmatter="frontmatter" collection="work" />
           </TabsContent>
         </Tabs>

@@ -230,9 +230,9 @@ defineExpose({ insertAtCursor })
 </script>
 
 <template>
-  <div class="flex flex-col h-full w-full overflow-hidden rounded-2xl border border-transparent bg-surface-container-low shadow-[var(--elevation-1)]">
+  <div class="flex h-full w-full flex-col overflow-hidden rounded-2xl bg-surface-container-low">
     <!-- toolbar -->
-    <div class="flex items-center gap-0.5 border-b border-border px-2 py-1 shrink-0 bg-card flex-wrap">
+    <div class="flex shrink-0 flex-wrap items-center gap-0.5 bg-surface-container-high px-2 py-1.5">
       <template v-for="(item, i) in toolbarActions" :key="i">
         <div v-if="'separator' in item" class="w-px h-4 bg-border mx-1" />
         <button

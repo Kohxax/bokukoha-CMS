@@ -59,7 +59,7 @@ const containerRef = ref<HTMLElement | null>(null)
 <template>
   <div
     ref="containerRef"
-    class="site-preview h-full w-full overflow-auto rounded-md bg-background text-foreground"
+    class="site-preview h-full w-full overflow-auto rounded-2xl bg-surface-container-low text-foreground"
   >
     <div class="h-full w-full min-w-0">
       <article
